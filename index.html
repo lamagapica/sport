@@ -97,7 +97,7 @@ return{sets,fo,po,days,st,xp:sets*10+fo*5+po*8+days*40+Object.values(db.rest).re
 function head(){const s=stats(),l=Math.floor(Math.sqrt(s.xp/40))+1,a=40*(l-1)**2,b=40*l*l;
 $('#rk').textContent=`Nv ${l} · ${RANKS[Math.min(l-1,RANKS.length-1)]}`;
 $('#st').textContent=`🔥 ${s.st} día${s.st==1?'':'s'}`;
-$('#xb').style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'%';$('#xt').textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}`}
+$('#xb').style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'\%';$('#xt').textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}`}
 
 const NAV=[['hoy','🗺️','Hoy'],['ent','🏋️','Entreno'],['com','🍽️','Comida'],['pos','🧘','Postura'],['cal','📅','Calendario'],['des','⏱️','Descanso'],['pro','📈','Progreso']];
 function render(){head();$('#nav').innerHTML='';NAV.forEach(([k,i,n])=>{const b=E('button',k==view?'on':'',`<b>${i}</b>${n}`);b.onclick=()=>{view=k;render();scrollTo(0,0)};$('#nav').append(b)});
@@ -229,3 +229,4 @@ iv=setInterval(tick,250)};
 inf.textContent='Récord: '+(db.hs[game]||0);w.append(c,pk,bs,ar);return w}
 render();
 </script></body></html>
+```[cite: 1]
