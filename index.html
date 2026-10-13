@@ -60,7 +60,7 @@ button.chip{color:var(--t);border:0;font:inherit;font-size:13px;cursor:pointer}
 const K='mision-iregua',$=s=>document.querySelector(s),
 E=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e},
 esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
-let db={logs:{},food:{},post:{},extra:{},quests:{},kcal:2200,rest:{},hs:{}};
+let db={logs:{},food:{},post:{},extra:{},quests:{},weather:{},weeklyChall:{},kcal:2200,rest:{},hs:{}};
 try{Object.assign(db,JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}};
 const fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -74,17 +74,39 @@ rest:{n:'Descanso activo · Paseo del Iregua',i:'🌿',ex:[]}};
 const TY=['rest','push','pull','legs','push','pull','rest'];
 const type=d=>TY[pd(d).getDay()],exs=t=>[...R[t].ex,...(db.extra[t]||[])];
 const POST=['Retroversión pélvica tumbada · 2×15 (aguanta 3 s)','Puente de glúteo con pelvis retrovertida · 3×12','Dead bug · 3×8 por lado','Gato-vaca · 2×10','Retracción cervical (mentón atrás) · 2×10','Wall angels · 2×10','Plancha con pelvis retrovertida · 3×20 s','Estiramiento de flexores de cadera · 2×30 s por lado'];
-const Q=['Hoy el río suena a favor tuyo.','Cada serie es un paso más en tu propia leyenda.','La disciplina es una forma de cariño hacia la versión de ti de dentro de un año.','Luz de mañana, tronco firme, piedras bajo los pies: eso ya es una aventura.','No hace falta motivación: hay un camino y tú sabes recorrerlo.','Pequeñas victorias, grandes historias.','Tu cuerpo es tu campamento base: cuídalo y te llevará lejos.'];
-const RANKS=['Aprendiz del Iregua','Exploradora del Soto','Guardiana del Tronco','Cazadora de Amaneceres','Señora del Río','Leyenda del Camino'];
+const Q=['Hoy el río suena a favor tuyo.[cite: 1]','Cada serie es un paso más en tu propia leyenda.[cite: 1]','La disciplina es una forma de cariño hacia la versión de ti de dentro de un año.[cite: 1]','Luz de mañana, tronco firme, piedras bajo los pies: eso ya es una aventura.[cite: 1]','No hace falta motivación: hay un camino y tú sabes recorrerlo.[cite: 1]','Pequeñas victorias, grandes historias.[cite: 1]','Tu cuerpo es tu campamento base: cuídalo y te llevará lejos.[cite: 1]'];
 
-// Misiones internas de aventura que se generan o se activan cada día
+// Títulos honoríficos e inventario RPG (Idea 2)
+const RANKS=[
+  {lv:1,n:'Aprendiz del Iregua',desc:'Desbloqueado al iniciar el camino'},
+  {lv:3,n:'Exploradora del Soto',desc:'Desbloqueado en Nivel 3'},
+  {lv:5,n:'Guardiana del Tronco',desc:'Desbloqueado en Nivel 5'},
+  {lv:8,n:'Cazadora de Amaneceres',desc:'Desbloqueado en Nivel 8'},
+  {lv:12,n:'Señora del Río',desc:'Desbloqueado en Nivel 12'},
+  {lv:15,n:'Leyenda del Camino',desc:'Desbloqueado al alcanzar la maestría total'}
+];
+
+// Clima y entorno del Iregua (Idea 3)
+const WEATHER_OPTS=[
+  {id:'sun',i:'☀️',n:'Mañana despejada'},
+  {id:'wind',i:'💨',n:'Viento del norte'},
+  {id:'river',i:'💧',n:'Frescor de río'},
+  {id:'leaves',i:'🍂',n:'Hojas caídas y calma'}
+];
+
+// Retos semanales / Desafío Racha de Fuego (Idea 4)
+const WEEKLY_CHALLENGES=[
+  {id:'posture_week',t:'Semana de Postura de Acero',d:'Completa la rutina de postura 5 días esta semana.',target:5,type:'post'},
+  {id:'food_week',t:'Combustible de Leyenda',d:'Registra tu comida 6 días esta semana.',target:6,type:'food'}
+];
+
 const INTERNAL_QUESTS=[
-  {id:'water',t:'Hidratación Sagrada',d:'Bebe un buen tramo de agua fresca antes de comenzar la faena.',xp:20},
-  {id:'breeze',t:'Brisa del Iregua',d:'Haz 3 respiraciones profundas al aire libre mirando al río.',xp:25},
-  {id:'stretch_extra',t:'Estiramiento Nómada',d:'Mantén un estiramiento extra de piernas o espalda durante 1 minuto sin prisa.',xp:30},
-  {id:'clean_form',t:'Precisión de Acero',d:'Realiza la primera serie de hoy con pausa de 2 segundos en el punto más difícil.',xp:35},
-  {id:'sunlight',t:'Baño de Luz',d:'Deja que el sol de la mañana te dé en la cara al menos 2 minutos mientras calientas.',xp:25},
-  {id:'gratitude',t:'ofrenda al Camino',d:'Agradece en silencio una cosa de tu cuerpo y otra del entorno antes de terminar.',xp:20}
+  {id:'water',t:'Hidratación Sagrada',d:'Bebe un buen tramo de agua fresca antes de comenzar la faena.[cite: 1]',xp:20},
+  {id:'breeze',t:'Brisa del Iregua',d:'Haz 3 respiraciones profundas al aire libre mirando al río.[cite: 1]',xp:25},
+  {id:'stretch_extra',t:'Estiramiento Nómada',d:'Mantén un estiramiento extra de piernas o espalda durante 1 minuto sin prisa.[cite: 1]',xp:30},
+  {id:'clean_form',t:'Precisión de Acero',d:'Realiza la primera serie de hoy con pausa de 2 segundos en el punto más difícil.[cite: 1]',xp:35},
+  {id:'sunlight',t:'Baño de Luz',d:'Deja que el sol de la mañana te dé en la cara al menos 2 minutos mientras calientas.[cite: 1]',xp:25},
+  {id:'gratitude',t:'Ofrenda al Camino',d:'Agradece en silencio una cosa de tu cuerpo y otra del entorno antes de terminar.[cite: 1]',xp:20}
 ];
 
 const FOODS={'Arroz cocido':130,'Pasta cocida':150,'Pan':265,'Pan integral':250,'Avena':370,'Pechuga de pollo':165,'Ternera':200,'Huevo':143,'Atún en lata':130,'Salmón':208,'Lentejas cocidas':116,'Garbanzos cocidos':164,'Patata cocida':87,'Plátano':89,'Manzana':52,'Naranja':47,'Leche':46,'Yogur natural':61,'Skyr':63,'Queso fresco':98,'Aguacate':160,'Aceite de oliva':884,'Frutos secos':600,'Crema de cacahuete':600,'Tomate':18,'Verdura':30,'Chocolate negro':550,'Jamón serrano':240,'Tortilla de patata':190,'Hummus':230};
@@ -101,7 +123,6 @@ const full=d=>{const m=mis(d);return m.t&&m.p&&m.f&&active(d)};
 function getDailyQuests(d){
   db.quests=db.quests||{};
   if(!db.quests[d]){
-    // Seleccionar 2 misiones aleatorias basadas en la fecha como semilla fija
     const seed = d.split('-').reduce((a,b)=>a+parseInt(b),0);
     const q1 = INTERNAL_QUESTS[seed % INTERNAL_QUESTS.length];
     const q2 = INTERNAL_QUESTS[(seed + 2) % INTERNAL_QUESTS.length];
@@ -128,9 +149,10 @@ while(active(fmt(d))){st++;d.setDate(d.getDate()-1)}
 return{sets,fo,po,days,st,xp:sets*10+fo*5+po*8+days*40+Object.values(db.rest).reduce((a,b)=>a+b,0)*10+qxp}}
 
 function head(){const s=stats(),l=Math.floor(Math.sqrt(s.xp/40))+1,a=40*(l-1)**2,b=40*l*l;
-$('#rk'].textContent=`Nv ${l} · ${RANKS[Math.min(l-1,RANKS.length-1)]}`;
-$('#st'].textContent=`🔥 ${s.st} día${s.st==1?'':'s'}`;
-$('#xb'].style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'\%';$('#xt'].textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}`}
+const currentRank = [...RANKS].reverse().find(r=>l>=r.lv) || RANKS[0];
+$('#rk'].textContent=`Nv ${l} · ${currentRank.n}[cite: 1]`;
+$('#st'].textContent=`🔥 ${s.st} día${s.st==1?'':'s'}[cite: 1]`;
+$('#xb'].style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'\%';$('#xt'].textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}[cite: 1]`}
 
 const NAV=[['hoy','🗺️','Hoy'],['ent','🏋️','Entreno'],['com','🍽️','Comida'],['pos','🧘','Postura'],['cal','📅','Calendario'],['des','⏱️','Descanso'],['pro','📈','Progreso']];
 function render(){head();$('#nav').innerHTML='';NAV.forEach(([k,i,n])=>{const b=E('button',k==view?'on':'',`<b>${i}</b>${n}`);b.onclick=()=>{view=k;render();scrollTo(0,0)};$('#nav').append(b)});
@@ -140,21 +162,32 @@ if(view!='cal'&&view!='pro'&&view!='des')a.append(dp);
 a.append({hoy:vHoy,ent:vTrain,com:vFood,pos:vPost,cal:vCal,des:vRest,pro:vProg}[view]())}
 
 function vHoy(){const w=E('div'),t=type(cur),m=mis(cur),s=stats(),doy=Math.floor(pd(cur)/864e5);
-w.append(E('h2','',`${R[t].i} ${R[t].n}`));
-w.append(E('div','card',`<i>“${Q[doy%Q.length]}”</i>`));
+w.append(E('h2','',`${R[t].i} ${R[t].n}[cite: 1]`));
+w.append(E('div','card',`<i>“${Q[doy%Q.length]}”</i>[cite: 1]`));
 
-// Misiones principales
-const c=E('div','card','<b>Misiones del día</b>');
+// Selector de Clima e Iregua (Idea 3)
+db.weather=db.weather||{};
+const currentW=db.weather[cur]||'sun';
+const wcCard=E('div','card','<b>🌦️ Entorno del Iregua</b><div class="m" style="margin-bottom:6px">¿Cómo está el ambiente hoy junto al río?[cite: 1]</div>');
+const rowW=E('div','row');
+WEATHER_OPTS.forEach(wo=>{
+  const chip=E('button','chip'+(currentW==wo.id?' on':''),`${wo.i} ${wo.n}`);
+  chip.onclick=()=>{db.weather[cur]=wo.id;save();render()};
+  rowW.append(chip);
+});
+wcCard.append(rowW);
+w.append(wcCard);
+
+const c=E('div','card','<b>Misiones del día</b>[cite: 1]');
 [[m.t,t==='rest'?'Descanso activo: camina junto al río':'Completar el entreno ('+exs(t).length+' ejercicios)'],[m.p,'Postura y pelvis (mín. 4 ejercicios)'],[m.f,'Registrar tu comida']].forEach(([o,x])=>c.append(E('div','mis',`<span class="${o?'ok':'m'}">${o?'✅':'⬜'}</span>${x}`)));
 c.append(E('div','m',full(cur)?'¡Día perfecto! +40 XP ✨':'Completa las 3 misiones para el bonus de +40 XP'));w.append(c);
 
-// Misiones Internas de Aventura
 const seed = cur.split('-').reduce((a,b)=>a+parseInt(b),0);
 const q1 = INTERNAL_QUESTS[seed % INTERNAL_QUESTS.length];
 const q2 = INTERNAL_QUESTS[(seed + 2) % INTERNAL_QUESTS.length];
 const qStatus = getDailyQuests(cur);
 
-const qc=E('div','card','<b>🗺️ Misiones Internas del Camino</b><div class="m" style="margin-bottom:6px">Tareas especiales de aventura para hoy:</div>');
+const qc=E('div','card','<b>🗺️ Misiones Internas del Camino</b><div class="m" style="margin-bottom:6px">Tareas especiales de aventura para hoy:[cite: 1]</div>');
 [q1, q2].forEach(q=>{
   const done = !!qStatus[q.id];
   const l=E('label','ck',`<input type=checkbox ${done?'checked':''}> <span><b>${q.t}</b> (+${q.xp} XP)<br><span class="m">${q.d}</span></span>`);
@@ -170,7 +203,7 @@ w.append(qc);
 const L=[['Primera serie',s.sets>=1],['Racha 3',s.st>=3],['Racha 7',s.st>=7],['Racha 30',s.st>=30],['100 series',s.sets>=100],['Día perfecto',s.days>=1],['10 días perfectos',s.days>=10]];
 w.append(E('div','card','<b>Logros</b><br>'+L.map(([n,o])=>`<span class="chip ${o?'on':''}">${o?'🏆':'🔒'} ${n}</span>`).join('')));return w}
 
-function vTrain(){const w=E('div'),t=type(cur);w.append(E('h2','',`${R[t].i} ${R[t].n}`));
+function vTrain(){const w=E('div'),t=type(cur);w.append(E('h2','',`${R[t].i} ${R[t].n}[cite: 1]`));
 if(!exs(t).length)w.append(E('p','m','Hoy toca descanso activo. Haz la rutina de postura y pasea. Si quieres, entrena igualmente desde otro día.'));
 exs(t).forEach(ex=>{const L=(db.logs[cur]||{})[ex]||[],p=prev(ex,cur),c=E('div','card',`<b>${esc(ex)}</b>`);
 if(p)c.append(E('div','m',`Última vez (${p.d}): ${p.s.map(s=>s.w+'kg×'+s.r).join(' · ')}`));
@@ -222,6 +255,33 @@ arr.forEach((a,i)=>{x.fillStyle=a[1]>=goal*.9?'#7fb069':'#e9b44c';const h=a[1]/m
 x.strokeStyle='#eef2e6';x.setLineDash([8,8]);x.beginPath();x.moveTo(0,H-30-goal/mx*(H-50));x.lineTo(W,H-30-goal/mx*(H-50));x.stroke();x.setLineDash([])}
 
 function vProg(){const w=E('div');w.append(E('h2','','📈 Tu evolución'));
+
+// Inventario y Grimorio de Títulos (Idea 2 en Progreso/Perfil)
+const sStats=stats();
+const rankCard=E('div','card','<b>🎒 Inventario y Títulos de Aventura</b><div class="m" style="margin-bottom:8px">Tus rangos desbloqueados por disciplina:[cite: 1]</div>');
+RANKS.forEach(r=>{
+  const unlocked = Math.floor(Math.sqrt(sStats.xp/40))+1 >= r.lv;
+  rankCard.append(E('div','mis',`<span class="${unlocked?'ok':'m'}">${unlocked?'🏆':'🔒'}</span><span><b>${r.n}</b> (Nv ${r.lv})<br><span class="m">${r.desc}</span></span>`));
+});
+w.append(rankCard);
+
+// Desafío de la Racha de Fuego / Retos Semanales (Idea 4)
+const chCard=E('div','card','<b>🔥 Desafíos de la Racha de Fuego</b><div class="m" style="margin-bottom:8px">Retos semanales para potenciar tu constancia:[cite: 1]</div>');
+const now = new Date();
+const startOfWeek = new Date(now);
+startOfWeek.setDate(now.getDate() - ((now.getDay()+6)%7));
+let weekDaysCount = 0;
+for(let i=0; i<7; i++){
+  const dStr = fmt(new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate()+i));
+  if((db.post[dStr]||[]).length>=4) weekDaysCount++;
+}
+WEEKLY_CHALLENGES.forEach(ch=>{
+  const prog = Math.min(ch.target, weekDaysCount);
+  const done = prog >= ch.target;
+  chCard.append(E('div','mis',`<span class="${done?'ok':'m'}">${done?'✅':'🔥'}</span><span><b>${ch.t}</b> (${prog}/${ch.target} días)<br><span class="m">${ch.d}</span></span>`));
+});
+w.append(chCard);
+
 const all=[...new Set(Object.values(db.logs).flatMap(d=>Object.keys(d)))];
 if(!all.length)w.append(E('p','m','Registra series en Entreno y aquí verás tu gráfico.'));
 else{if(!all.includes(pex))pex=all[0];const sel=E('select','',all.map(a=>`<option ${a==pex?'selected':''}>${esc(a)}</option>`).join(''));sel.onchange=()=>{pex=sel.value;render()};w.append(sel);
@@ -233,7 +293,7 @@ const c2=E('div','card','<b>Calorías · últimos 14 días</b>');c2.append(E('ca
 const arr=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);arr.push([fmt(d),kc(fmt(d))])}requestAnimationFrame(()=>bars(c2.lastChild,arr,db.kcal));
 const b=E('div','card','<b>Copia de seguridad</b><div class="m">Tus datos se guardan en este navegador. Exporta de vez en cuando.</div>'),r=E('div','row'),e=E('button','btn','Exportar'),i=E('input');i.type='file';i.accept='.json';
 e.onclick=()=>{const a=E('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db)],{type:'application/json'}));a.download='mision-iregua.json';a.click()};
-i.onchange=()=>{const f=i.files[0];if(!f)return;f.text().then(t=>{try{db=Object.assign({logs:{},food:{},post:{},extra:{},quests:{},kcal:2200},JSON.parse(t));save();render()}catch(x){alert('Archivo no válido')}})};
+i.onchange=()=>{const f=i.files[0];if(!f)return;f.text().then(t=>{try{db=Object.assign({logs:{},food:{},post:{},extra:{},quests:{},weather:{},weeklyChall:{},kcal:2200},JSON.parse(t));save();render()}catch(x){alert('Archivo no válido')}})};
 r.append(e,i);b.append(r);w.append(b);return w}
 
 let stopFn=null;
