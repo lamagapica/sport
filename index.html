@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Misión Iregua</title>
+<style>
+:root{--bg:#10170f;--card:#1a251a;--ac:#e9b44c;--g:#7fb069;--t:#eef2e6;--m:#93a58a;--r:#d9695f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font:15px/1.4 system-ui,sans-serif;padding-bottom:76px}
+header{padding:14px 16px;background:linear-gradient(#22331f,#10170f);position:sticky;top:0;z-index:5}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rank{font-weight:700;color:var(--ac)}.m{color:var(--m);font-size:13px}
+.bar{height:8px;background:#2b3a28;border-radius:5px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--g),var(--ac));transition:width .4s}
+main{padding:12px 16px;max-width:640px;margin:auto}
+h2{margin:6px 0 10px;font-size:20px}
+.card{background:var(--card);border-radius:14px;padding:12px;margin-bottom:12px}
+.row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+input,select{background:#0e150d;color:var(--t);border:1px solid #33452f;border-radius:9px;padding:9px;font-size:15px;min-width:0;flex:1}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--ac);color:#1b1500;border:0;border-radius:9px;padding:9px 14px;font-weight:700}
+.x{background:none;border:0;color:var(--r);float:right}
+.set{padding:4px 0;border-bottom:1px solid #263525}
+.chip{display:inline-block;background:#2b3a28;border-radius:20px;padding:3px 10px;margin:2px;font-size:13px}
+.chip.on{background:var(--ac);color:#1b1500;font-weight:700}
+.mis{display:flex;gap:10px;align-items:center;padding:6px 0}
+.ok{color:var(--g)}.bad{color:var(--r)}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0b110a;border-top:1px solid #263525}
+nav button{flex:1;background:none;border:0;color:var(--m);padding:10px 0;font-size:11px}
+nav button b{display:block;font-size:20px;font-weight:400}
+nav .on{color:var(--ac)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal div{background:var(--card);border-radius:8px;padding:6px 0;min-height:48px;font-size:13px;cursor:pointer}
+.cal .h{background:none;min-height:0;color:var(--m);cursor:default}
+.cal .sel{outline:2px solid var(--ac)}.cal .full{background:#35502d}
+canvas{width:100%;height:180px;display:block}
+label.ck{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #263525}
+label.ck input{flex:none;width:22px;height:22px}
+button.chip{color:var(--t);border:0;font:inherit;font-size:13px;cursor:pointer}
+.clk{font-size:56px;font-weight:700;text-align:center;color:var(--ac)}
+.gr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tile{aspect-ratio:1;font-size:28px;background:#2b3a28;border:0;border-radius:10px;color:var(--t)}
+.arena{position:relative;height:260px;background:#0b110a;border-radius:12px;overflow:hidden}
+.ff{position:absolute;font-size:32px;background:none;border:0;animation:gl 1s infinite alternate}
+@keyframes gl{to{transform:scale(1.3)}}
+.sm{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sm .btn{padding:16px;font-size:20px}
+.sb{height:80px;border:0;border-radius:14px;transition:opacity .15s}
+.br{width:180px;height:180px;margin:20px auto;border-radius:50%;background:radial-gradient(var(--g),#2b3a28)}
+.big{font-size:26px;text-align:center;padding:12px}
+</style></head><body>
+<header>
+ <div class="top"><span class="rank" id="rk"></span><span id="st"></span></div>
+ <div class="bar"><i id="xb"></i></div>
+ <div class="m" id="xt"></div>
+</header>
+<main id="app"></main>
+<nav id="nav"></nav>
+<datalist id="fl"></datalist>
+<script>
+const K='mision-iregua',$=s=>document.querySelector(s),
+E=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e},
+esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+let db={logs:{},food:{},post:{},extra:{},kcal:2200,rest:{},hs:{}};
+try{Object.assign(db,JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}};
+const fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const pd=s=>{const[a,b,c]=s.split('-');return new Date(a,b-1,c)};
+let cur=fmt(new Date()),view='hoy',cm=new Date(),pex='';cm.setDate(1);
+
+const R={push:{n:'Empuje · Puente del Tronco',i:'🛡️',ex:['Flexiones','Press militar','Rompecráneos 90°']},
+pull:{n:'Tirón · Forja del Río',i:'🏹',ex:['Remo unilateral','Curl de bíceps','Curl inclinado','Curl martillo']},
+legs:{n:'Pierna · Ascenso de Piedras',i:'⛰️',ex:['Sentadilla','Zancada','Puente de glúteo','Elevación de talones']},
+rest:{n:'Descanso activo · Paseo del Iregua',i:'🌿',ex:[]}};
+const TY=['rest','push','pull','legs','push','pull','rest'];
+const type=d=>TY[pd(d).getDay()],exs=t=>[...R[t].ex,...(db.extra[t]||[])];
+const POST=['Retroversión pélvica tumbada · 2×15 (aguanta 3 s)','Puente de glúteo con pelvis retrovertida · 3×12','Dead bug · 3×8 por lado','Gato-vaca · 2×10','Retracción cervical (mentón atrás) · 2×10','Wall angels · 2×10','Plancha con pelvis retrovertida · 3×20 s','Estiramiento de flexores de cadera · 2×30 s por lado'];
+const Q=['Hoy el río suena a favor tuyo.','Cada serie es un paso más en tu propia leyenda.','La disciplina es una forma de cariño hacia la versión de ti de dentro de un año.','Luz de mañana, tronco firme, piedras bajo los pies: eso ya es una aventura.','No hace falta motivación: hay un camino y tú sabes recorrerlo.','Pequeñas victorias, grandes historias.','Tu cuerpo es tu campamento base: cuídalo y te llevará lejos.'];
+const RANKS=['Aprendiz del Iregua','Exploradora del Soto','Guardiana del Tronco','Cazadora de Amaneceres','Señora del Río','Leyenda del Camino'];
+const FOODS={'Arroz cocido':130,'Pasta cocida':150,'Pan':265,'Pan integral':250,'Avena':370,'Pechuga de pollo':165,'Ternera':200,'Huevo':143,'Atún en lata':130,'Salmón':208,'Lentejas cocidas':116,'Garbanzos cocidos':164,'Patata cocida':87,'Plátano':89,'Manzana':52,'Naranja':47,'Leche':46,'Yogur natural':61,'Skyr':63,'Queso fresco':98,'Aguacate':160,'Aceite de oliva':884,'Frutos secos':600,'Crema de cacahuete':600,'Tomate':18,'Verdura':30,'Chocolate negro':550,'Jamón serrano':240,'Tortilla de patata':190,'Hummus':230};
+$('#fl').innerHTML=Object.keys(FOODS).map(f=>`<option value="${f}">`).join('');
+
+const score=s=>s.reduce((a,x)=>a+x.r*(x.w>0?x.w:1),0);
+function prev(ex,date){const d=Object.keys(db.logs).filter(k=>k<date&&(db.logs[k][ex]||[]).length).sort().pop();return d?{d,s:db.logs[d][ex]}:null}
+const hasT=d=>Object.values(db.logs[d]||{}).some(a=>a.length);
+const kc=d=>(db.food[d]||[]).reduce((a,f)=>a+f.k,0);
+const active=d=>hasT(d)||(db.food[d]||[]).length||(db.post[d]||[]).length;
+const mis=d=>({t:type(d)==='rest'||hasT(d),p:(db.post[d]||[]).length>=4,f:(db.food[d]||[]).length>=1});
+const full=d=>{const m=mis(d);return m.t&&m.p&&m.f&&active(d)};
+function stats(){db.rest=db.rest||{};db.hs=db.hs||{};let sets=0,fo=0,po=0,days=0;
+Object.keys(db.logs).forEach(d=>Object.values(db.logs[d]).forEach(a=>sets+=a.length));
+Object.keys(db.food).forEach(d=>fo+=db.food[d].length);Object.keys(db.post).forEach(d=>po+=db.post[d].length);
+new Set([...Object.keys(db.logs),...Object.keys(db.food),...Object.keys(db.post)]).forEach(d=>{if(full(d))days++});
+let st=0,d=new Date();if(!active(fmt(d)))d.setDate(d.getDate()-1);
+while(active(fmt(d))){st++;d.setDate(d.getDate()-1)}
+return{sets,fo,po,days,st,xp:sets*10+fo*5+po*8+days*40+Object.values(db.rest).reduce((a,b)=>a+b,0)*10}}
+
+function head(){const s=stats(),l=Math.floor(Math.sqrt(s.xp/40))+1,a=40*(l-1)**2,b=40*l*l;
+$('#rk').textContent=`Nv ${l} · ${RANKS[Math.min(l-1,RANKS.length-1)]}`;
+$('#st').textContent=`🔥 ${s.st} día${s.st==1?'':'s'}`;
+$('#xb').style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'%';$('#xt').textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}`}
+
+const NAV=[['hoy','🗺️','Hoy'],['ent','🏋️','Entreno'],['com','🍽️','Comida'],['pos','🧘','Postura'],['cal','📅','Calendario'],['des','⏱️','Descanso'],['pro','📈','Progreso']];
+function render(){head();$('#nav').innerHTML='';NAV.forEach(([k,i,n])=>{const b=E('button',k==view?'on':'',`<b>${i}</b>${n}`);b.onclick=()=>{view=k;render();scrollTo(0,0)};$('#nav').append(b)});
+if(stopFn)stopFn();stopFn=null;const a=$('#app');a.innerHTML='';
+const dp=E('input');dp.type='date';dp.value=cur;dp.onchange=()=>{if(dp.value){cur=dp.value;render()}};
+if(view!='cal'&&view!='pro'&&view!='des')a.append(dp);
+a.append({hoy:vHoy,ent:vTrain,com:vFood,pos:vPost,cal:vCal,des:vRest,pro:vProg}[view]())}
+
+function vHoy(){const w=E('div'),t=type(cur),m=mis(cur),s=stats(),doy=Math.floor(pd(cur)/864e5);
+w.append(E('h2','',`${R[t].i} ${R[t].n}`));
+w.append(E('div','card',`<i>“${Q[doy%Q.length]}”</i>`));
+const c=E('div','card','<b>Misiones del día</b>');
+[[m.t,t==='rest'?'Descanso activo: camina junto al río':'Completar el entreno ('+exs(t).length+' ejercicios)'],[m.p,'Postura y pelvis (mín. 4 ejercicios)'],[m.f,'Registrar tu comida']].forEach(([o,x])=>c.append(E('div','mis',`<span class="${o?'ok':'m'}">${o?'✅':'⬜'}</span>${x}`)));
+c.append(E('div','m',full(cur)?'¡Día perfecto! +40 XP ✨':'Completa las 3 misiones para el bonus de +40 XP'));w.append(c);
+const L=[['Primera serie',s.sets>=1],['Racha 3',s.st>=3],['Racha 7',s.st>=7],['Racha 30',s.st>=30],['100 series',s.sets>=100],['Día perfecto',s.days>=1],['10 días perfectos',s.days>=10]];
+w.append(E('div','card','<b>Logros</b><br>'+L.map(([n,o])=>`<span class="chip ${o?'on':''}">${o?'🏆':'🔒'} ${n}</span>`).join('')));return w}
+
+function vTrain(){const w=E('div'),t=type(cur);w.append(E('h2','',`${R[t].i} ${R[t].n}`));
+if(!exs(t).length)w.append(E('p','m','Hoy toca descanso activo. Haz la rutina de postura y pasea. Si quieres, entrena igualmente desde otro día.'));
+exs(t).forEach(ex=>{const L=(db.logs[cur]||{})[ex]||[],p=prev(ex,cur),c=E('div','card',`<b>${esc(ex)}</b>`);
+if(p)c.append(E('div','m',`Última vez (${p.d}): ${p.s.map(s=>s.w+'kg×'+s.r).join(' · ')}`));
+L.forEach((s,i)=>{const r=E('div','set',`Serie ${i+1}: <b>${s.w} kg × ${s.r}</b>`),b=E('button','x','✕');b.onclick=()=>{L.splice(i,1);if(!L.length)delete db.logs[cur][ex];save();render()};r.append(b);c.append(r)});
+const f=E('div','row','<input type=number step=.5 min=0 placeholder="kg (0 = cuerpo)"><input type=number min=1 placeholder="reps">'),[wi,ri]=f.querySelectorAll('input');
+wi.value=L.length?L[L.length-1].w:(p?p.s[0].w:'');
+const b=E('button','btn','+ serie');b.onclick=()=>{const r=+ri.value;if(!r)return;(db.logs[cur]=db.logs[cur]||{})[ex]=[...L,{w:+wi.value||0,r}];save();render()};
+f.append(b);c.append(f);w.append(c)});
+const f=E('div','row','<input placeholder="Añadir ejercicio a este día">'),b=E('button','btn','+');
+b.onclick=()=>{const v=f.firstChild.value.trim();if(v){(db.extra[t]=db.extra[t]||[]).push(v);save();render()}};f.append(b);w.append(f);return w}
+
+function vFood(){const w=E('div'),F=db.food[cur]||[],tot=kc(cur);w.append(E('h2','','🍽️ Provisiones'));
+const c=E('div','card',`<b>${tot} kcal</b> de tu meta de <b>${db.kcal}</b>`);
+c.append(E('div','bar',`<i style="width:${Math.min(100,tot/db.kcal*100)}%"></i>`));
+c.append(E('div','m','La meta es combustible para entrenar y recuperarte, no un límite. Ajústala con tu médico o nutricionista si dudas.'));
+const mf=E('div','row','<input type=number placeholder="Meta kcal">'),mi=mf.firstChild;mi.value=db.kcal;mi.onchange=()=>{if(+mi.value>0){db.kcal=+mi.value;save();render()}};c.append(mf);w.append(c);
+F.forEach((x,i)=>{const r=E('div','set',`${esc(x.n)} — <b>${x.k} kcal</b>`),b=E('button','x','✕');b.onclick=()=>{F.splice(i,1);save();render()};r.append(b);w.append(r)});
+const f=E('div','card','<b>Añadir comida</b><div class="row"><input list=fl placeholder="Alimento"><input type=number placeholder="gramos"><input type=number placeholder="kcal (opcional)"></div>'),[n,g,k]=f.querySelectorAll('input'),b=E('button','btn','Añadir');
+b.onclick=()=>{const nm=n.value.trim(),key=Object.keys(FOODS).find(x=>x.toLowerCase()==nm.toLowerCase());let kk=+k.value;if(!kk&&key&&+g.value)kk=Math.round(FOODS[key]*g.value/100);
+if(!nm||!kk){alert('Pon alimento + gramos (si está en la lista) o las kcal a mano.');return}
+(db.food[cur]=db.food[cur]||[]).push({n:nm+(+g.value?` (${g.value} g)`:''),k:kk});save();render()};
+f.append(b);w.append(f);return w}
+
+function vPost(){const w=E('div'),P=db.post[cur]||[];w.append(E('h2','','🧘 Ritual de postura y pelvis'));
+w.append(E('p','m','Cada día, despacio y con la respiración tranquila. Mejor poco y bien hecho que mucho con prisa.'));
+POST.forEach((x,i)=>{const l=E('label','ck',`<input type=checkbox ${P.includes(i)?'checked':''}> <span>${x}</span>`);
+l.firstChild.onchange=e=>{const s=new Set(db.post[cur]||[]);e.target.checked?s.add(i):s.delete(i);db.post[cur]=[...s];if(!s.size)delete db.post[cur];save();render()};w.append(l)});
+w.append(E('p','m',`${P.length}/${POST.length} hechos`));return w}
+
+function vCal(){const w=E('div'),y=cm.getFullYear(),mo=cm.getMonth();
+const h=E('div','top',`<button class="btn" id="pv">◀</button><h2>${cm.toLocaleDateString('es',{month:'long',year:'numeric'})}</h2><button class="btn" id="nx">▶</button>`);w.append(h);
+h.querySelector('#pv').onclick=()=>{cm.setMonth(mo-1);render()};h.querySelector('#nx').onclick=()=>{cm.setMonth(mo+1);render()};
+const g=E('div','cal');'LMXJVSD'.split('').forEach(x=>g.append(E('div','h',x)));
+const off=(new Date(y,mo,1).getDay()+6)%7;for(let i=0;i<off;i++)g.append(E('div','h',''));
+for(let d=1;d<=new Date(y,mo+1,0).getDate();d++){const k=fmt(new Date(y,mo,d)),c=E('div',(k==cur?'sel ':'')+(full(k)?'full':''),`${d}<br>${hasT(k)?'🏋':''}${(db.food[k]||[]).length?'🍽':''}${(db.post[k]||[]).length?'🧘':''}`);
+c.onclick=()=>{cur=k;view='hoy';render()};g.append(c)}
+w.append(g);w.append(E('p','m','🏋 entreno · 🍽 comida · 🧘 postura · fondo verde = día perfecto. Toca un día para verlo.'));return w}
+
+function line(cv,pts){const x=cv.getContext('2d'),W=cv.width=cv.clientWidth*2,H=cv.height=360;x.clearRect(0,0,W,H);x.font='24px sans-serif';x.fillStyle='#93a58a';
+if(!pts.length){x.fillText('Aún sin datos',20,60);return}
+const ys=pts.map(p=>p[1]);let mx=Math.max(...ys),mn=Math.min(...ys);if(mx==mn){mx+=1;mn-=1}
+const X=i=>40+(pts.length>1?i/(pts.length-1):.5)*(W-80),Y=v=>H-50-(v-mn)/(mx-mn)*(H-110);
+pts.forEach((p,i)=>{if(i){x.strokeStyle=p[1]>=pts[i-1][1]?(p[1]>pts[i-1][1]?'#7fb069':'#e9b44c'):'#d9695f';x.lineWidth=4;x.beginPath();x.moveTo(X(i-1),Y(pts[i-1][1]));x.lineTo(X(i),Y(p[1]));x.stroke()}
+x.fillStyle='#eef2e6';x.beginPath();x.arc(X(i),Y(p[1]),7,0,7);x.fill()});
+x.fillStyle='#93a58a';x.fillText(pts[0][0].slice(5),10,H-12);x.fillText(pts.at(-1)[0].slice(5),W-90,H-12);x.fillText(Math.round(mx),10,30)}
+function bars(cv,arr,goal){const x=cv.getContext('2d'),W=cv.width=cv.clientWidth*2,H=cv.height=360;x.clearRect(0,0,W,H);
+const mx=Math.max(goal,...arr.map(a=>a[1]))*1.1,bw=W/arr.length;
+arr.forEach((a,i)=>{x.fillStyle=a[1]>=goal*.9?'#7fb069':'#e9b44c';const h=a[1]/mx*(H-50);x.fillRect(i*bw+4,H-30-h,bw-8,h)});
+x.strokeStyle='#eef2e6';x.setLineDash([8,8]);x.beginPath();x.moveTo(0,H-30-goal/mx*(H-50));x.lineTo(W,H-30-goal/mx*(H-50));x.stroke();x.setLineDash([])}
+
+function vProg(){const w=E('div');w.append(E('h2','','📈 Tu evolución'));
+const all=[...new Set(Object.values(db.logs).flatMap(d=>Object.keys(d)))];
+if(!all.length)w.append(E('p','m','Registra series en Entreno y aquí verás tu gráfico.'));
+else{if(!all.includes(pex))pex=all[0];const sel=E('select','',all.map(a=>`<option ${a==pex?'selected':''}>${esc(a)}</option>`).join(''));sel.onchange=()=>{pex=sel.value;render()};w.append(sel);
+const pts=Object.keys(db.logs).sort().filter(d=>(db.logs[d][pex]||[]).length).map(d=>[d,score(db.logs[d][pex])]);
+const c=E('div','card');c.append(E('canvas'));w.append(c);
+let msg='Primera sesión registrada: ¡punto de partida!';if(pts.length>1){const a=pts.at(-2)[1],b=pts.at(-1)[1],p=Math.round((b-a)/a*100);msg=b>a?`<span class=ok>▲ Mejoras: +${p}% de volumen vs. la sesión anterior</span>`:b==a?'= Igual que la sesión anterior':`<span class=bad>▼ Baja ${-p}% vs. la sesión anterior (descansa, come y vuelve)</span>`}
+c.append(E('div','m','Volumen = kg × reps (con peso corporal cuenta 1 kg por rep)'));c.append(E('div','',msg));requestAnimationFrame(()=>line(c.firstChild,pts))}
+const c2=E('div','card','<b>Calorías · últimos 14 días</b>');c2.append(E('canvas'));w.append(c2);
+const arr=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);arr.push([fmt(d),kc(fmt(d))])}requestAnimationFrame(()=>bars(c2.lastChild,arr,db.kcal));
+const b=E('div','card','<b>Copia de seguridad</b><div class="m">Tus datos se guardan en este navegador. Exporta de vez en cuando.</div>'),r=E('div','row'),e=E('button','btn','Exportar'),i=E('input');i.type='file';i.accept='.json';
+e.onclick=()=>{const a=E('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db)],{type:'application/json'}));a.download='mision-iregua.json';a.click()};
+i.onchange=()=>{const f=i.files[0];if(!f)return;f.text().then(t=>{try{db=Object.assign({logs:{},food:{},post:{},extra:{},kcal:2200},JSON.parse(t));save();render()}catch(x){alert('Archivo no válido')}})};
+r.append(e,i);b.append(r);w.append(b);return w}
+
+let stopFn=null;
+const EM=['🌲','🦊','🍄','🦉','🌸','🐟','🪨','🦌','🌙','⭐'];
+const GAMES={
+mem(a,sc){let lv=3,open=[],lock=false,found=0,t=[];
+function L(){a.innerHTML='';const em=EM.slice(0,lv),cs=[...em,...em].sort(()=>Math.random()-.5);found=0;open=[];lock=false;const g=E('div','gr');
+cs.forEach(x=>{const b=E('button','tile','❓');b.onclick=()=>{if(lock||b.dataset.o)return;b.textContent=x;b.dataset.o=1;open.push(b);
+if(open.length==2){lock=true;const[p,q]=open;if(p.textContent==q.textContent){sc(10);found++;open=[];lock=false;if(found==lv){lv=Math.min(lv+1,10);t.push(setTimeout(L,500))}}
+else t.push(setTimeout(()=>{[p,q].forEach(z=>{z.textContent='❓';delete z.dataset.o});open=[];lock=false},700))}};g.append(b)});a.append(g)}
+L();return()=>t.forEach(clearTimeout)},
+fire(a,sc){a.innerHTML='<div class="arena"></div>';const ar=a.firstChild;let rate=800,run=1,tm;
+function sp(){if(!run)return;const b=E('button','ff','✨');b.style.left=Math.random()*80+'%';b.style.top=Math.random()*80+'%';b.onclick=()=>{sc(5);b.remove()};ar.append(b);setTimeout(()=>b.remove(),1300);rate=Math.max(350,rate-8);tm=setTimeout(sp,rate)}
+sp();return()=>{run=0;clearTimeout(tm)}},
+mat(a,sc){let n=0;const q=()=>{a.innerHTML='';const o=['+','−','×'][Math.random()*(n<3?2:3)|0],M=n<6?10:30;let x=1+Math.random()*M|0,y=1+Math.random()*M|0;if(o=='×'){x=2+Math.random()*8|0;y=2+Math.random()*8|0}
+const r=o=='+'?x+y:o=='−'?x-y:x*y,s=new Set([r]);while(s.size<4)s.add(r+(Math.random()*11|0)-5);
+a.append(E('div','big',`${x} ${o} ${y} = ?`));const g=E('div','sm');
+[...s].sort(()=>Math.random()-.5).forEach(v=>{const b=E('button','btn',v);b.onclick=()=>{if(v==r){sc(5);n++}q()};g.append(b)});a.append(g)};q();return()=>{}},
+sim(a,sc){const C=['#d9695f','#e9b44c','#7fb069','#5b8def'];a.innerHTML='<div class="sm"></div><div class="m" style="text-align:center;margin-top:8px">Mira…</div>';const g=a.firstChild,sg=a.lastChild;
+const B=C.map((c,i)=>{const b=E('button','sb');b.style.background=c;b.style.opacity=.45;b.onclick=()=>tap(i);g.append(b);return b});
+let seq=[],pos=0,busy=true,t=[];const fl=i=>{B[i].style.opacity=1;t.push(setTimeout(()=>B[i].style.opacity=.45,350))};
+function play(){busy=true;sg.textContent='Mira…';seq.push(Math.random()*4|0);pos=0;seq.forEach((s,k)=>t.push(setTimeout(()=>fl(s),600+k*600)));t.push(setTimeout(()=>{busy=false;sg.textContent='Tu turno'},600+seq.length*600))}
+function tap(i){if(busy)return;fl(i);if(i!=seq[pos]){sg.textContent='Fallaste, de nuevo';seq=[];busy=true;t.push(setTimeout(play,900));return}
+if(++pos==seq.length){sc(seq.length*3);busy=true;t.push(setTimeout(play,700))}}
+play();return()=>t.forEach(clearTimeout)},
+res(a){a.innerHTML='<div class="br"></div><div class="m" style="text-align:center">Inhala…</div>';const c=a.firstChild,tx=a.lastChild;let run=1,t;
+function cyc(i){if(!run)return;c.style.transition='transform '+(i?6:4)+'s ease-in-out';c.style.transform=i?'scale(.5)':'scale(1)';tx.textContent=i?'Exhala despacio…':'Inhala por la nariz…';t=setTimeout(()=>cyc(1-i),i?6000:4000)}
+c.style.transform='scale(.5)';setTimeout(()=>cyc(0),50);return()=>{run=0;clearTimeout(t)}}};
+function beep(){try{const A=new AudioContext(),o=A.createOscillator();o.connect(A.destination);o.frequency.value=880;o.start();o.stop(A.currentTime+.4)}catch(e){}navigator.vibrate&&navigator.vibrate([200,100,200])}
+
+function vRest(){const w=E('div'),names={mem:'🧠 Memoria',fire:'✨ Luciérnagas',mat:'➗ Cálculo',sim:'🎵 Secuencia',res:'🌬️ Respira'};
+w.append(E('h2','','⏱️ Descanso entre series'));
+const c=E('div','card','<div class="clk">3:00</div><div class="m" style="text-align:center">Elige un minijuego y empieza. Al acabar los 3 min: +10 XP.</div>'),clk=c.firstChild,inf=c.lastChild;
+const pk=E('div','row'),ar=E('div','card','<div class="m">Pulsa empezar para jugar</div>'),bs=E('button','btn','▶ Empezar descanso (3:00)');bs.style.cssText='width:100%;margin:6px 0 12px';
+let game=db.lastGame||'mem',score=0,end=0,iv=0,cl=null;
+const rec=()=>{if(score>(db.hs[game]||0)){db.hs[game]=score;save()}};
+const sc=n=>{score+=n;inf.textContent=`Puntos: ${score} · récord ${Math.max(score,db.hs[game]||0)}`};
+const stop=()=>{clearInterval(iv);iv=0;if(cl)cl();cl=null;rec()};
+const run=()=>{if(cl)cl();score=0;ar.innerHTML='';sc(0);cl=GAMES[game](ar,sc)};
+stopFn=stop;
+const mk=()=>{pk.innerHTML='';Object.entries(names).forEach(([k,n])=>{const b=E('button','chip'+(k==game?' on':''),n);
+b.onclick=()=>{rec();game=k;db.lastGame=k;save();mk();if(iv)run();else inf.textContent='Récord: '+(db.hs[k]||0)};pk.append(b)})};mk();
+bs.onclick=()=>{if(iv){stop();bs.textContent='▶ Empezar descanso (3:00)';clk.textContent='3:00';return}
+end=Date.now()+18e4;bs.textContent='■ Terminar ya';run();
+const tick=()=>{const l=Math.max(0,end-Date.now()),s=Math.ceil(l/1000);clk.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+if(l<=0){stop();const t=fmt(new Date());db.rest[t]=(db.rest[t]||0)+1;save();head();ar.innerHTML='<div class="big">¡Descanso terminado!<br>A por la siguiente serie 💪</div>';bs.textContent='▶ Otro descanso (3:00)';beep()}};
+iv=setInterval(tick,250)};
+inf.textContent='Récord: '+(db.hs[game]||0);w.append(c,pk,bs,ar);return w}
+render();
+</script></body></html>
