@@ -43,12 +43,16 @@ button.chip{color:var(--t);border:0;font:inherit;font-size:13px;cursor:pointer}
 .ff{position:absolute;font-size:32px;background:none;border:0;animation:gl 1s infinite alternate}
 @keyframes gl{to{transform:scale(1.3)}}
 .sm{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.sm .btn{padding:16px;font-size:20px}
+.sm .btn{padding:16px;font-size:18px}
 .sb{height:80px;border:0;border-radius:14px;transition:opacity .15s}
 .br{width:180px;height:180px;margin:20px auto;border-radius:50%;background:radial-gradient(var(--g),#2b3a28)}
-.big{font-size:26px;text-align:center;padding:12px}
+.big{font-size:22px;text-align:center;padding:12px;font-weight:600}
 .macro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;text-align:center}
 .macro-box{background:#0e150d;border:1px solid #33452f;border-radius:8px;padding:6px;font-size:12px}
+.quiz-opt{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+.quiz-btn{background:#0e150d;border:1px solid #33452f;color:var(--t);padding:12px;border-radius:9px;text-align:left;font-size:14px;transition:background .2s}
+.quiz-btn:active{background:#2b3a28}
+.quiz-feedback{text-align:center;font-weight:700;margin-top:8px;min-height:24px}
 </style></head><body>
 <header>
  <div class="top"><span class="rank" id="rk"></span><span id="st"></span></div>
@@ -82,7 +86,7 @@ applyTheme(db.theme);
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}};
 const fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const pd=s=>{const[a,b,c]=s.split('-');return new Date(a,b-1,c)};
-let cur=fmt(new Date()),view='hoy',cm=new Date(),pex='';cm.setDate(1);
+let cur=fmt(new Date()),view='hoy',cm=new Date(),pex='',stopFn=null;cm.setDate(1);
 
 const R={push:{n:'Empuje · Puente del Tronco',i:'🛡️',ex:['Flexiones','Press militar','Rompecráneos 90°']},
 pull:{n:'Tirón · Forja del Río',i:'🏹',ex:['Remo unilateral','Curl de bíceps','Curl inclinado','Curl martillo']},
@@ -91,7 +95,7 @@ rest:{n:'Descanso activo · Paseo del Iregua',i:'🌿',ex:[]}};
 const TY=['rest','push','pull','legs','push','pull','rest'];
 const type=d=>TY[pd(d).getDay()],exs=t=>[...R[t].ex,...(db.extra[t]||[])];
 const POST=['Retroversión pélvica tumbada · 2×15 (aguanta 3 s)','Puente de glúteo con pelvis retrovertida · 3×12','Dead bug · 3×8 por lado','Gato-vaca · 2×10','Retracción cervical (mentón atrás) · 2×10','Wall angels · 2×10','Plancha con pelvis retrovertida · 3×20 s','Estiramiento de flexores de cadera · 2×30 s por lado'];
-const Q=['Hoy el río suena a favor tuyo[cite: 1].','Cada serie es un paso más en tu propia leyenda[cite: 1].','La disciplina es una forma de cariño hacia la versión de ti de dentro de un año[cite: 1].','Luz de mañana, tronco firme, piedras bajo los pies: eso ya es una aventura[cite: 1].','No hace falta motivación: hay un camino y tú sabes recorrerlo[cite: 1].','Pequeñas victorias, grandes historias[cite: 1].','Tu cuerpo es tu campamento base: cuídalo y te llevará lejos[cite: 1].'];
+const Q=['Hoy el río suena a favor tuyo.','Cada serie es un paso más en tu propia leyenda.','La disciplina es una forma de cariño hacia la versión de ti de dentro de un año.','Luz de mañana, tronco firme, piedras bajo los pies: eso ya es una aventura.','No hace falta motivación: hay un camino y tú sabes recorrerlo.','Pequeñas victorias, grandes historias.','Tu cuerpo es tu campamento base: cuídalo y te llevará lejos.'];
 
 const RANKS=[
   {lv:1,n:'Aprendiz del Iregua',desc:'Desbloqueado al iniciar el camino'},
@@ -115,12 +119,12 @@ const WEEKLY_CHALLENGES=[
 ];
 
 const INTERNAL_QUESTS=[
-  {id:'water',t:'Hidratación Sagrada',d:'Bebe un buen tramo de agua fresca antes de comenzar la faena[cite: 1].',xp:20},
-  {id:'breeze',t:'Brisa del Iregua',d:'Haz 3 respiraciones profundas al aire libre mirando al río[cite: 1].',xp:25},
-  {id:'stretch_extra',t:'Estiramiento Nómada',d:'Mantén un estiramiento extra de piernas o espalda durante 1 minuto sin prisa[cite: 1].',xp:30},
-  {id:'clean_form',t:'Precisión de Acero',d:'Realiza la primera serie de hoy con pausa de 2 segundos en el punto más difícil[cite: 1].',xp:35},
-  {id:'sunlight',t:'Baño de Luz',d:'Deja que el sol de la mañana te dé en la cara al menos 2 minutos mientras calientas[cite: 1].',xp:25},
-  {id:'gratitude',t:'Ofrenda al Camino',d:'Agradece en silencio una cosa de tu cuerpo y otra del entorno antes de terminar[cite: 1].',xp:20}
+  {id:'water',t:'Hidratación Sagrada',d:'Bebe un buen tramo de agua fresca antes de comenzar la faena.',xp:20},
+  {id:'breeze',t:'Brisa del Iregua',d:'Haz 3 respiraciones profundas al aire libre mirando al río.',xp:25},
+  {id:'stretch_extra',t:'Estiramiento Nómada',d:'Mantén un estiramiento extra de piernas o espalda durante 1 minuto sin prisa.',xp:30},
+  {id:'clean_form',t:'Precisión de Acero',d:'Realiza la primera serie de hoy con pausa de 2 segundos en el punto más difícil.',xp:35},
+  {id:'sunlight',t:'Baño de Luz',d:'Deja que el sol de la mañana te dé en la cara al menos 2 minutos mientras calientas.',xp:25},
+  {id:'gratitude',t:'Ofrenda al Camino',d:'Agradece en silencio una cosa de tu cuerpo y otra del entorno antes de terminar.',xp:20}
 ];
 
 const FOODS={
@@ -176,9 +180,9 @@ return{sets,fo,po,days,st,xp:sets*10+fo*5+po*8+days*40+Object.values(db.rest).re
 
 function head(){const s=stats(),l=Math.floor(Math.sqrt(s.xp/40))+1,a=40*(l-1)**2,b=40*l*l;
 const currentRank = [...RANKS].reverse().find(r=>l>=r.lv) || RANKS[0];
-$('#rk').textContent=`Nv ${l} · ${currentRank.n}[cite: 1]`;
-$('#st').textContent=`🔥 ${s.st} día${s.st==1?'':'s'}[cite: 1]`;
-$('#xb').style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'\%';$('#xt').textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}[cite: 1]`}
+$('#rk').textContent=`Nv ${l} · ${currentRank.n}`;
+$('#st').textContent=`🔥 ${s.st} día${s.st==1?'':'s'}`;
+$('#xb').style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'%';$('#xt').textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}`}
 
 const NAV=[['hoy','🗺️','Hoy'],['ent','🏋️','Entreno'],['com','🍽️','Comida'],['pos','🧘','Postura'],['cal','📅','Calendario'],['des','⏱️','Descanso'],['pro','📈','Progreso']];
 function render(){head();$('#nav').innerHTML='';NAV.forEach(([k,i,n])=>{const b=E('button',k==view?'on':'',`<b>${i}</b>${n}`);b.onclick=()=>{view=k;render();scrollTo(0,0)};$('#nav').append(b)});
@@ -188,12 +192,12 @@ if(view!='cal'&&view!='pro'&&view!='des')a.append(dp);
 a.append({hoy:vHoy,ent:vTrain,com:vFood,pos:vPost,cal:vCal,des:vRest,pro:vProg}[view]())}
 
 function vHoy(){const w=E('div'),t=type(cur),m=mis(cur),s=stats(),doy=Math.floor(pd(cur)/864e5);
-w.append(E('h2','',`${R[t].i} ${R[t].n}[cite: 1]`));
-w.append(E('div','card',`<i>“${Q[doy%Q.length]}”</i>[cite: 1]`));
+w.append(E('h2','',`${R[t].i} ${R[t].n}`));
+w.append(E('div','card',`<i>“${Q[doy%Q.length]}”</i>`));
 
 db.weather=db.weather||{};
 const currentW=db.weather[cur]||'sun';
-const wcCard=E('div','card','<b>🌦️ Entorno del Iregua</b><div class="m" style="margin-bottom:6px">¿Cómo está el ambiente hoy junto al río?[cite: 1]</div>');
+const wcCard=E('div','card','<b>🌦️ Entorno del Iregua</b><div class="m" style="margin-bottom:6px">¿Cómo está el ambiente hoy junto al río?</div>');
 const rowW=E('div','row');
 WEATHER_OPTS.forEach(wo=>{
   const chip=E('button','chip'+(currentW==wo.id?' on':''),`${wo.i} ${wo.n}`);
@@ -211,7 +215,7 @@ const btnMinus=E('button','btn','- Quitar');btnMinus.onclick=()=>{if(waterCount>
 const btnPlus=E('button','btn','+ 1 Vaso de agua');btnPlus.onclick=()=>{db.water[cur]=waterCount+1;save();render()};
 waterRow.append(btnMinus,btnPlus);waterCard.append(waterRow);w.append(waterCard);
 
-const c=E('div','card','<b>Misiones del día</b>[cite: 1]');
+const c=E('div','card','<b>Misiones del día</b>');
 [[m.t,t==='rest'?'Descanso activo: camina junto al río':'Completar el entreno ('+exs(t).length+' ejercicios)'],[m.p,'Postura y pelvis (mín. 4 ejercicios)'],[m.f,'Registrar tu comida']].forEach(([o,x])=>c.append(E('div','mis',`<span class="${o?'ok':'m'}">${o?'✅':'⬜'}</span>${x}`)));
 c.append(E('div','m',full(cur)?'¡Día perfecto! +40 XP ✨':'Completa las 3 misiones para el bonus de +40 XP'));w.append(c);
 
@@ -220,7 +224,7 @@ const q1 = INTERNAL_QUESTS[seed % INTERNAL_QUESTS.length];
 const q2 = INTERNAL_QUESTS[(seed + 2) % INTERNAL_QUESTS.length];
 const qStatus = getDailyQuests(cur);
 
-const qc=E('div','card','<b>🗺️ Misiones Internas del Camino</b><div class="m" style="margin-bottom:6px">Tareas especiales de aventura para hoy:[cite: 1]</div>');
+const qc=E('div','card','<b>🗺️ Misiones Internas del Camino</b><div class="m" style="margin-bottom:6px">Tareas especiales de aventura para hoy:</div>');
 [q1, q2].forEach(q=>{
   const done = !!qStatus[q.id];
   const l=E('label','ck',`<input type=checkbox ${done?'checked':''}> <span><b>${q.t}</b> (+${q.xp} XP)<br><span class="m">${q.d}</span></span>`);
@@ -236,7 +240,7 @@ w.append(qc);
 const L=[['Primera serie',s.sets>=1],['Racha 3',s.st>=3],['Racha 7',s.st>=7],['Racha 30',s.st>=30],['100 series',s.sets>=100],['Día perfecto',s.days>=1],['10 días perfectos',s.days>=10]];
 w.append(E('div','card','<b>Logros</b><br>'+L.map(([n,o])=>`<span class="chip ${o?'on':''}">${o?'🏆':'🔒'} ${n}</span>`).join('')));return w}
 
-function vTrain(){const w=E('div'),t=type(cur);w.append(E('h2','',`${R[t].i} ${R[t].n}[cite: 1]`));
+function vTrain(){const w=E('div'),t=type(cur);w.append(E('h2','',`${R[t].i} ${R[t].n}`));
 if(!exs(t).length)w.append(E('p','m','Hoy toca descanso activo. Haz la rutina de postura y pasea. Si quieres, entrena igualmente desde otro día.'));
 exs(t).forEach(ex=>{const L=(db.logs[cur]||{})[ex]||[],p=prev(ex,cur),c=E('div','card',`<b>${esc(ex)}</b>`);
 if(p)c.append(E('div','m',`Última vez (${p.d}): ${p.s.map(s=>s.w+'kg×'+s.r).join(' · ')}`));
@@ -319,14 +323,14 @@ const themeRow=E('div','row');
 themeCard.append(themeRow);w.append(themeCard);
 
 const sStats=stats();
-const rankCard=E('div','card','<b>🎒 Inventario y Títulos de Aventura</b><div class="m" style="margin-bottom:8px">Tus rangos desbloqueados por disciplina[cite: 1]:</div>');
+const rankCard=E('div','card','<b>🎒 Inventario y Títulos de Aventura</b><div class="m" style="margin-bottom:8px">Tus rangos desbloqueados por disciplina:</div>');
 RANKS.forEach(r=>{
   const unlocked = Math.floor(Math.sqrt(sStats.xp/40))+1 >= r.lv;
   rankCard.append(E('div','mis',`<span class="${unlocked?'ok':'m'}">${unlocked?'🏆':'🔒'}</span><span><b>${r.n}</b> (Nv ${r.lv})<br><span class="m">${r.desc}</span></span>`));
 });
 w.append(rankCard);
 
-const chCard=E('div','card','<b>🔥 Desafíos de la Racha de Fuego</b><div class="m" style="margin-bottom:8px">Retos semanales para potenciar tu constancia[cite: 1]:</div>');
+const chCard=E('div','card','<b>🔥 Desafíos de la Racha de Fuego</b><div class="m" style="margin-bottom:8px">Retos semanales para potenciar tu constancia:</div>');
 const now = new Date();
 const startOfWeek = new Date(now);
 startOfWeek.setDate(now.getDate() - ((now.getDay()+6)%7));
@@ -358,8 +362,44 @@ e.onclick=()=>{const a=E('a');a.href=URL.createObjectURL(new Blob([JSON.stringif
 i.onchange=()=>{const f=i.files[0];if(!f)return;f.text().then(t=>{try{db=Object.assign({logs:{},food:{},post:{},extra:{},quests:{},weather:{},weeklyChall:{},kcal:2200,water:{},theme:'iregua',rest:{},hs:{}},JSON.parse(t));applyTheme(db.theme||'iregua');save();render()}catch(x){alert('Archivo no válido')}})};
 r.append(e,i);b.append(r);w.append(b);return w}
 
-let stopFn=null;
 const EM=['🌲','🦊','🍄','🦉','🌸','🐟','🪨','🦌','🌙','⭐'];
+
+const CULTURA_QUESTIONS = [
+  {q:'¿Cuál es el río más largo del mundo?',o:['Amazonas','Nilo','Misisipi','Yangtsé'],a:0},
+  {q:'¿En qué año llegó el ser humano a la Luna?',o:['1965','1969','1972','1959'],a:1},
+  {q:'¿Cuál es el elemento químico más abundante en el universo?',o:['Oxígeno','Carbono','Hidrógeno','Helio'],a:2},
+  {q:'¿Quién pintó la Mona Lisa?',o:['Vincent van Gogh','Leonardo da Vinci','Pablo Picasso','Claude Monet'],a:1},
+  {q:'¿Cuál es el país más extenso del planeta?',o:['Canadá','China','Estados Unidos','Rusia'],a:3},
+  {q:'¿En qué museo se encuentra la escultura de la Venus de Milo?',o:['El Prado','Louvre','British Museum','Uffizi'],a:1},
+  {q:'¿Cuál es el hueso más largo del cuerpo humano?',o:['Fémur','Tibia','Húmero','Radio'],a:0},
+  {q:'¿Qué gas absorben principalmente las plantas durante la fotosíntesis?',o:['Oxígeno','Dióxido de carbono','Nitrógeno','Mióxido'],a:1},
+  {q:'¿Qué cordillera separa Europa de Asia?',o:['Los Alpes','Los Pirineos','Los Montes Urales','El Himalaya'],a:2},
+  {q:'¿A qué velocidad aproximada viaja la luz en el vacío?',o:['300.000 km/s','150.000 km/s','1.000.000 km/s','500.000 km/s'],a:0},
+  {q:'¿Cuál es la capital de Australia?',o:['Sídney','Melbourne','Canberra','Brisbane'],a:2},
+  {q:'¿Quién escribió "Don Quijote de la Mancha"?',o:['Lope de Vega','Miguel de Cervantes','Francisco de Quevedo','Calderón de la Barca'],a:1},
+  {q:'¿Qué planeta del sistema solar es conocido como el "planeta rojo"?',o:['Venus','Júpiter','Marte','Saturno'],a:2},
+  {q:'¿En qué continente se encuentra el desierto del Sahara?',o:['Asia','África','América del Sur','Oceanía'],a:1},
+  {q:'¿Cuál es el océano más grande de la Tierra?',o:['Océano Atlántico','Océano Índico','Océano Pacífico','Océano Ártico'],a:2}
+];
+
+const INGLES_QUESTIONS = [
+  {q:'¿Cómo se traduce "Aprender"?',o:['Learn','Teach','Listen','Speak'],a:0},
+  {q:'Elige la forma correcta: "She _____ to the gym every morning."',o:['go','goes','going','gone'],a:1},
+  {q:'¿Cuál es el pasado simple del verbo "Buy" (Comprar)?',o:['Buyed','Bought','Bring','Brought'],a:1},
+  {q:'¿Qué significa "River" en español?',o:['Montaña','Río','Bosque','Camino'],a:1},
+  {q:'Elige el sinónimo de "Fast":',o:['Slow','Quick','Heavy','Late'],a:1},
+  {q:'Completa la frase: "If I _____ time, I will read a book."',o:['have','had','has','having'],a:0},
+  {q:'¿Cómo se dice "Desayuno" en inglés?',o:['Dinner','Lunch','Breakfast','Snack'],a:2},
+  {q:'Elige la frase gramaticalmente correcta:',o:['He don\'t like apples','He doesn\'t likes apples','He doesn\'t like apples','He not like apples'],a:2},
+  {q:'¿Cuál es el opuesto (antónimo) de "Strong"?',o:['Tired','Weak','Small','Light'],a:1},
+  {q:'¿Qué significa la expresión "Better late than never"?',o:['Más vale tarde que nunca','El tiempo es oro','A quien madruga Dios le ayuda','Más vale prevenir que curar'],a:0},
+  {q:'¿Cómo se traduce "Fuerza"?',o:['Strength','Health','Weight','Speed'],a:0},
+  {q:'Completa: "They have been living here _____ 2010."',o:['for','since','during','from'],a:1},
+  {q:'¿Cuál es el participio pasado del verbo "Eat"?',o:['Ate','Eating','Eaten','Eats'],a:2},
+  {q:'¿Qué significa la palabra "Healthy"?',o:['Fuerte','Saludable','Pesado','Rápido'],a:1},
+  {q:'Elige el plural correcto de "Child":',o:['Childs','Childrens','Children','Childes'],a:2}
+];
+
 const GAMES={
 mem(a,sc){let lv=3,open=[],lock=false,found=0,t=[];
 function L(){a.innerHTML='';const em=EM.slice(0,lv),cs=[...em,...em].sort(()=>Math.random()-.5);found=0;open=[];lock=false;const g=E('div','gr');
@@ -381,13 +421,79 @@ function play(){busy=true;sg.textContent='Mira…';seq.push(Math.random()*4|0);p
 function tap(i){if(busy)return;fl(i);if(i!=seq[pos]){sg.textContent='Fallaste, de nuevo';seq=[];busy=true;t.push(setTimeout(play,900));return}
 if(++pos==seq.length){sc(seq.length*3);busy=true;t.push(setTimeout(play,700))}}
 play();return()=>t.forEach(clearTimeout)},
+cul(a,sc){
+  let t=[];
+  const renderQ=()=>{
+    a.innerHTML='';
+    const item = CULTURA_QUESTIONS[Math.floor(Math.random()*CULTURA_QUESTIONS.length)];
+    a.append(E('div','big',item.q));
+    const optDiv = E('div','quiz-opt');
+    const feedback = E('div','quiz-feedback','');
+    let locked = false;
+    item.o.forEach((opt, idx)=>{
+      const btn = E('button','quiz-btn',opt);
+      btn.onclick=()=>{
+        if(locked) return;
+        locked = true;
+        if(idx === item.a){
+          btn.style.borderColor = 'var(--g)';
+          btn.style.background = '#283c22';
+          feedback.innerHTML = '<span class="ok">¡Correcto! (+10 pts)</span>';
+          sc(10);
+        } else {
+          btn.style.borderColor = 'var(--r)';
+          btn.style.background = '#3c2222';
+          feedback.innerHTML = '<span class="bad">Incorrecto</span>';
+        }
+        t.push(setTimeout(renderQ, 1200));
+      };
+      optDiv.append(btn);
+    });
+    a.append(optDiv, feedback);
+  };
+  renderQ();
+  return ()=>t.forEach(clearTimeout);
+},
+ing(a,sc){
+  let t=[];
+  const renderQ=()=>{
+    a.innerHTML='';
+    const item = INGLES_QUESTIONS[Math.floor(Math.random()*INGLES_QUESTIONS.length)];
+    a.append(E('div','big',item.q));
+    const optDiv = E('div','quiz-opt');
+    const feedback = E('div','quiz-feedback','');
+    let locked = false;
+    item.o.forEach((opt, idx)=>{
+      const btn = E('button','quiz-btn',opt);
+      btn.onclick=()=>{
+        if(locked) return;
+        locked = true;
+        if(idx === item.a){
+          btn.style.borderColor = 'var(--g)';
+          btn.style.background = '#283c22';
+          feedback.innerHTML = '<span class="ok">¡Great! (+10 pts)</span>';
+          sc(10);
+        } else {
+          btn.style.borderColor = 'var(--r)';
+          btn.style.background = '#3c2222';
+          feedback.innerHTML = '<span class="bad">Oops! Incorrect</span>';
+        }
+        t.push(setTimeout(renderQ, 1200));
+      };
+      optDiv.append(btn);
+    });
+    a.append(optDiv, feedback);
+  };
+  renderQ();
+  return ()=>t.forEach(clearTimeout);
+},
 res(a){a.innerHTML='<div class="br"></div><div class="m" style="text-align:center">Inhala…</div>';const c=a.firstChild,tx=a.lastChild;let run=1,t;
 function cyc(i){if(!run)return;c.style.transition='transform '+(i?6:4)+'s ease-in-out';c.style.transform=i?'scale(.5)':'scale(1)';tx.textContent=i?'Exhala despacio…':'Inhala por la nariz…';t=setTimeout(()=>cyc(1-i),i?6000:4000)}
 c.style.transform='scale(.5)';setTimeout(()=>cyc(0),50);return()=>{run=0;clearTimeout(t)}}};
 
 function beep(){try{const A=new AudioContext(),o=A.createOscillator();o.connect(A.destination);o.frequency.value=880;o.start();o.stop(A.currentTime+.4)}catch(e){}navigator.vibrate&&navigator.vibrate([200,100,200])}
 
-function vRest(){const w=E('div'),names={mem:'🧠 Memoria',fire:'✨ Luciérnagas',mat:'➗ Cálculo',sim:'🎵 Secuencia',res:'🌬️ Respira'};
+function vRest(){const w=E('div'),names={mem:'🧠 Memoria',fire:'✨ Luciérnagas',mat:'➗ Cálculo',sim:'🎵 Secuencia',cul:'🌐 Cultura',ing:'🇬🇧 Inglés',res:'🌬️ Respira'};
 w.append(E('h2','','⏱️ Descanso entre series'));
 const c=E('div','card','<div class="clk">3:00</div><div class="m" style="text-align:center">Elige un minijuego y empieza. Al acabar los 3 min: +10 XP.</div>'),clk=c.firstChild,inf=c.lastChild;
 const pk=E('div','row'),ar=E('div','card','<div class="m">Pulsa empezar para jugar</div>'),bs=E('button','btn','▶ Empezar descanso (3:00)');bs.style.cssText='width:100%;margin:6px 0 12px';
