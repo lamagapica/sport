@@ -60,7 +60,7 @@ button.chip{color:var(--t);border:0;font:inherit;font-size:13px;cursor:pointer}
 const K='mision-iregua',$=s=>document.querySelector(s),
 E=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e},
 esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
-let db={logs:{},food:{},post:{},extra:{},kcal:2200,rest:{},hs:{}};
+let db={logs:{},food:{},post:{},extra:{},quests:{},kcal:2200,rest:{},hs:{}};
 try{Object.assign(db,JSON.parse(localStorage.getItem(K)||'{}'))}catch(e){}
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}};
 const fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -76,6 +76,17 @@ const type=d=>TY[pd(d).getDay()],exs=t=>[...R[t].ex,...(db.extra[t]||[])];
 const POST=['Retroversión pélvica tumbada · 2×15 (aguanta 3 s)','Puente de glúteo con pelvis retrovertida · 3×12','Dead bug · 3×8 por lado','Gato-vaca · 2×10','Retracción cervical (mentón atrás) · 2×10','Wall angels · 2×10','Plancha con pelvis retrovertida · 3×20 s','Estiramiento de flexores de cadera · 2×30 s por lado'];
 const Q=['Hoy el río suena a favor tuyo.','Cada serie es un paso más en tu propia leyenda.','La disciplina es una forma de cariño hacia la versión de ti de dentro de un año.','Luz de mañana, tronco firme, piedras bajo los pies: eso ya es una aventura.','No hace falta motivación: hay un camino y tú sabes recorrerlo.','Pequeñas victorias, grandes historias.','Tu cuerpo es tu campamento base: cuídalo y te llevará lejos.'];
 const RANKS=['Aprendiz del Iregua','Exploradora del Soto','Guardiana del Tronco','Cazadora de Amaneceres','Señora del Río','Leyenda del Camino'];
+
+// Misiones internas de aventura que se generan o se activan cada día
+const INTERNAL_QUESTS=[
+  {id:'water',t:'Hidratación Sagrada',d:'Bebe un buen tramo de agua fresca antes de comenzar la faena.',xp:20},
+  {id:'breeze',t:'Brisa del Iregua',d:'Haz 3 respiraciones profundas al aire libre mirando al río.',xp:25},
+  {id:'stretch_extra',t:'Estiramiento Nómada',d:'Mantén un estiramiento extra de piernas o espalda durante 1 minuto sin prisa.',xp:30},
+  {id:'clean_form',t:'Precisión de Acero',d:'Realiza la primera serie de hoy con pausa de 2 segundos en el punto más difícil.',xp:35},
+  {id:'sunlight',t:'Baño de Luz',d:'Deja que el sol de la mañana te dé en la cara al menos 2 minutos mientras calientas.',xp:25},
+  {id:'gratitude',t:'ofrenda al Camino',d:'Agradece en silencio una cosa de tu cuerpo y otra del entorno antes de terminar.',xp:20}
+];
+
 const FOODS={'Arroz cocido':130,'Pasta cocida':150,'Pan':265,'Pan integral':250,'Avena':370,'Pechuga de pollo':165,'Ternera':200,'Huevo':143,'Atún en lata':130,'Salmón':208,'Lentejas cocidas':116,'Garbanzos cocidos':164,'Patata cocida':87,'Plátano':89,'Manzana':52,'Naranja':47,'Leche':46,'Yogur natural':61,'Skyr':63,'Queso fresco':98,'Aguacate':160,'Aceite de oliva':884,'Frutos secos':600,'Crema de cacahuete':600,'Tomate':18,'Verdura':30,'Chocolate negro':550,'Jamón serrano':240,'Tortilla de patata':190,'Hummus':230};
 $('#fl').innerHTML=Object.keys(FOODS).map(f=>`<option value="${f}">`).join('');
 
@@ -86,18 +97,40 @@ const kc=d=>(db.food[d]||[]).reduce((a,f)=>a+f.k,0);
 const active=d=>hasT(d)||(db.food[d]||[]).length||(db.post[d]||[]).length;
 const mis=d=>({t:type(d)==='rest'||hasT(d),p:(db.post[d]||[]).length>=4,f:(db.food[d]||[]).length>=1});
 const full=d=>{const m=mis(d);return m.t&&m.p&&m.f&&active(d)};
-function stats(){db.rest=db.rest||{};db.hs=db.hs||{};let sets=0,fo=0,po=0,days=0;
+
+function getDailyQuests(d){
+  db.quests=db.quests||{};
+  if(!db.quests[d]){
+    // Seleccionar 2 misiones aleatorias basadas en la fecha como semilla fija
+    const seed = d.split('-').reduce((a,b)=>a+parseInt(b),0);
+    const q1 = INTERNAL_QUESTS[seed % INTERNAL_QUESTS.length];
+    const q2 = INTERNAL_QUESTS[(seed + 2) % INTERNAL_QUESTS.length];
+    db.quests[d] = { [q1.id]:false, [q2.id]:false };
+    save();
+  }
+  return db.quests[d];
+}
+
+function stats(){db.rest=db.rest||{};db.hs=db.hs||{};let sets=0,fo=0,po=0,days=0,qxp=0;
 Object.keys(db.logs).forEach(d=>Object.values(db.logs[d]).forEach(a=>sets+=a.length));
 Object.keys(db.food).forEach(d=>fo+=db.food[d].length);Object.keys(db.post).forEach(d=>po+=db.post[d].length);
+Object.keys(db.quests||{}).forEach(d=>{
+  const qObj = db.quests[d];
+  const seed = d.split('-').reduce((a,b)=>a+parseInt(b),0);
+  const q1 = INTERNAL_QUESTS[seed % INTERNAL_QUESTS.length];
+  const q2 = INTERNAL_QUESTS[(seed + 2) % INTERNAL_QUESTS.length];
+  if(qObj[q1.id]) qxp += q1.xp;
+  if(qObj[q2.id]) qxp += q2.xp;
+});
 new Set([...Object.keys(db.logs),...Object.keys(db.food),...Object.keys(db.post)]).forEach(d=>{if(full(d))days++});
 let st=0,d=new Date();if(!active(fmt(d)))d.setDate(d.getDate()-1);
 while(active(fmt(d))){st++;d.setDate(d.getDate()-1)}
-return{sets,fo,po,days,st,xp:sets*10+fo*5+po*8+days*40+Object.values(db.rest).reduce((a,b)=>a+b,0)*10}}
+return{sets,fo,po,days,st,xp:sets*10+fo*5+po*8+days*40+Object.values(db.rest).reduce((a,b)=>a+b,0)*10+qxp}}
 
 function head(){const s=stats(),l=Math.floor(Math.sqrt(s.xp/40))+1,a=40*(l-1)**2,b=40*l*l;
-$('#rk').textContent=`Nv ${l} · ${RANKS[Math.min(l-1,RANKS.length-1)]}`;
-$('#st').textContent=`🔥 ${s.st} día${s.st==1?'':'s'}`;
-$('#xb').style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'\%';$('#xt').textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}`}
+$('#rk'].textContent=`Nv ${l} · ${RANKS[Math.min(l-1,RANKS.length-1)]}`;
+$('#st'].textContent=`🔥 ${s.st} día${s.st==1?'':'s'}`;
+$('#xb'].style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'\%';$('#xt'].textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}`}
 
 const NAV=[['hoy','🗺️','Hoy'],['ent','🏋️','Entreno'],['com','🍽️','Comida'],['pos','🧘','Postura'],['cal','📅','Calendario'],['des','⏱️','Descanso'],['pro','📈','Progreso']];
 function render(){head();$('#nav').innerHTML='';NAV.forEach(([k,i,n])=>{const b=E('button',k==view?'on':'',`<b>${i}</b>${n}`);b.onclick=()=>{view=k;render();scrollTo(0,0)};$('#nav').append(b)});
@@ -109,9 +142,31 @@ a.append({hoy:vHoy,ent:vTrain,com:vFood,pos:vPost,cal:vCal,des:vRest,pro:vProg}[
 function vHoy(){const w=E('div'),t=type(cur),m=mis(cur),s=stats(),doy=Math.floor(pd(cur)/864e5);
 w.append(E('h2','',`${R[t].i} ${R[t].n}`));
 w.append(E('div','card',`<i>“${Q[doy%Q.length]}”</i>`));
+
+// Misiones principales
 const c=E('div','card','<b>Misiones del día</b>');
 [[m.t,t==='rest'?'Descanso activo: camina junto al río':'Completar el entreno ('+exs(t).length+' ejercicios)'],[m.p,'Postura y pelvis (mín. 4 ejercicios)'],[m.f,'Registrar tu comida']].forEach(([o,x])=>c.append(E('div','mis',`<span class="${o?'ok':'m'}">${o?'✅':'⬜'}</span>${x}`)));
 c.append(E('div','m',full(cur)?'¡Día perfecto! +40 XP ✨':'Completa las 3 misiones para el bonus de +40 XP'));w.append(c);
+
+// Misiones Internas de Aventura
+const seed = cur.split('-').reduce((a,b)=>a+parseInt(b),0);
+const q1 = INTERNAL_QUESTS[seed % INTERNAL_QUESTS.length];
+const q2 = INTERNAL_QUESTS[(seed + 2) % INTERNAL_QUESTS.length];
+const qStatus = getDailyQuests(cur);
+
+const qc=E('div','card','<b>🗺️ Misiones Internas del Camino</b><div class="m" style="margin-bottom:6px">Tareas especiales de aventura para hoy:</div>');
+[q1, q2].forEach(q=>{
+  const done = !!qStatus[q.id];
+  const l=E('label','ck',`<input type=checkbox ${done?'checked':''}> <span><b>${q.t}</b> (+${q.xp} XP)<br><span class="m">${q.d}</span></span>`);
+  l.firstChild.onchange=e=>{
+    db.quests[cur][q.id] = e.target.checked;
+    save();
+    render();
+  };
+  qc.append(l);
+});
+w.append(qc);
+
 const L=[['Primera serie',s.sets>=1],['Racha 3',s.st>=3],['Racha 7',s.st>=7],['Racha 30',s.st>=30],['100 series',s.sets>=100],['Día perfecto',s.days>=1],['10 días perfectos',s.days>=10]];
 w.append(E('div','card','<b>Logros</b><br>'+L.map(([n,o])=>`<span class="chip ${o?'on':''}">${o?'🏆':'🔒'} ${n}</span>`).join('')));return w}
 
@@ -178,7 +233,7 @@ const c2=E('div','card','<b>Calorías · últimos 14 días</b>');c2.append(E('ca
 const arr=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);arr.push([fmt(d),kc(fmt(d))])}requestAnimationFrame(()=>bars(c2.lastChild,arr,db.kcal));
 const b=E('div','card','<b>Copia de seguridad</b><div class="m">Tus datos se guardan en este navegador. Exporta de vez en cuando.</div>'),r=E('div','row'),e=E('button','btn','Exportar'),i=E('input');i.type='file';i.accept='.json';
 e.onclick=()=>{const a=E('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db)],{type:'application/json'}));a.download='mision-iregua.json';a.click()};
-i.onchange=()=>{const f=i.files[0];if(!f)return;f.text().then(t=>{try{db=Object.assign({logs:{},food:{},post:{},extra:{},kcal:2200},JSON.parse(t));save();render()}catch(x){alert('Archivo no válido')}})};
+i.onchange=()=>{const f=i.files[0];if(!f)return;f.text().then(t=>{try{db=Object.assign({logs:{},food:{},post:{},extra:{},quests:{},kcal:2200},JSON.parse(t));save();render()}catch(x){alert('Archivo no válido')}})};
 r.append(e,i);b.append(r);w.append(b);return w}
 
 let stopFn=null;
@@ -229,4 +284,3 @@ iv=setInterval(tick,250)};
 inf.textContent='Récord: '+(db.hs[game]||0);w.append(c,pk,bs,ar);return w}
 render();
 </script></body></html>
-```[cite: 1]
