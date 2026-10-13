@@ -123,7 +123,6 @@ const INTERNAL_QUESTS=[
   {id:'gratitude',t:'Ofrenda al Camino',d:'Agradece en silencio una cosa de tu cuerpo y otra del entorno antes de terminar[cite: 1].',xp:20}
 ];
 
-// Alimentos con calorías y macros estimados por cada 100g
 const FOODS={
   'Arroz cocido':{k:130,p:2.7,c:28,f:0.3},'Pasta cocida':{k:150,p:5,c:25,f:1.1},'Pan':{k:265,p:9,c:49,f:3.2},
   'Pan integral':{k:250,p:13,c:41,f:3.5},'Avena':{k:370,p:13,c:60,f:7},'Pechuga de pollo':{k:165,p:31,c:0,f:3.6},
@@ -177,9 +176,9 @@ return{sets,fo,po,days,st,xp:sets*10+fo*5+po*8+days*40+Object.values(db.rest).re
 
 function head(){const s=stats(),l=Math.floor(Math.sqrt(s.xp/40))+1,a=40*(l-1)**2,b=40*l*l;
 const currentRank = [...RANKS].reverse().find(r=>l>=r.lv) || RANKS[0];
-$('#rk'].textContent=`Nv ${l} · ${currentRank.n}[cite: 1]`;
-$('#st'].textContent=`🔥 ${s.st} día${s.st==1?'':'s'}[cite: 1]`;
-$('#xb'].style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'\%';$('#xt'].textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}[cite: 1]`}
+$('#rk').textContent=`Nv ${l} · ${currentRank.n}[cite: 1]`;
+$('#st').textContent=`🔥 ${s.st} día${s.st==1?'':'s'}[cite: 1]`;
+$('#xb').style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'\%';$('#xt').textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}[cite: 1]`}
 
 const NAV=[['hoy','🗺️','Hoy'],['ent','🏋️','Entreno'],['com','🍽️','Comida'],['pos','🧘','Postura'],['cal','📅','Calendario'],['des','⏱️','Descanso'],['pro','📈','Progreso']];
 function render(){head();$('#nav').innerHTML='';NAV.forEach(([k,i,n])=>{const b=E('button',k==view?'on':'',`<b>${i}</b>${n}`);b.onclick=()=>{view=k;render();scrollTo(0,0)};$('#nav').append(b)});
@@ -192,7 +191,6 @@ function vHoy(){const w=E('div'),t=type(cur),m=mis(cur),s=stats(),doy=Math.floor
 w.append(E('h2','',`${R[t].i} ${R[t].n}[cite: 1]`));
 w.append(E('div','card',`<i>“${Q[doy%Q.length]}”</i>[cite: 1]`));
 
-// Clima y entorno del Iregua
 db.weather=db.weather||{};
 const currentW=db.weather[cur]||'sun';
 const wcCard=E('div','card','<b>🌦️ Entorno del Iregua</b><div class="m" style="margin-bottom:6px">¿Cómo está el ambiente hoy junto al río?[cite: 1]</div>');
@@ -205,7 +203,6 @@ WEATHER_OPTS.forEach(wo=>{
 wcCard.append(rowW);
 w.append(wcCard);
 
-// Control de Agua Rápido
 db.water=db.water||{};
 const waterCount=db.water[cur]||0;
 const waterCard=E('div','card',`<b>💧 Hidratación diaria: <span style="color:var(--ac)">${waterCount} vasos</span></b><div class="m" style="margin-bottom:8px">Suma vasos de agua fresca para cumplir tus metas.</div>`);
@@ -255,7 +252,6 @@ function vFood(){const w=E('div'),F=db.food[cur]||[],tot=kc(cur),mac=getMacros(c
 const c=E('div','card',`<b>${tot} kcal</b> de tu meta de <b>${db.kcal}</b>`);
 c.append(E('div','bar',`<i style="width:${Math.min(100,tot/db.kcal*100)}%"></i>`));
 
-// Desglose de Macronutrientes
 c.append(E('div','macro-grid',`
   <div class="macro-box"><b>Proteínas</b><br>${mac.p.toFixed(1)}g</div>
   <div class="macro-box"><b>Carbos</b><br>${mac.c.toFixed(1)}g</div>
@@ -313,7 +309,6 @@ x.strokeStyle='#eef2e6';x.setLineDash([8,8]);x.beginPath();x.moveTo(0,H-30-goal/
 
 function vProg(){const w=E('div');w.append(E('h2','','📈 Tu evolución y Ajustes'));
 
-// Selector de Tema Visual
 const themeCard=E('div','card','<b>🎨 Estética y Tema Visual</b><div class="m" style="margin-bottom:8px">Elige el ambiente de color de tu campamento:</div>');
 const themeRow=E('div','row');
 [['iregua','🌲 Bosque Iregua'],['otoño','🍂 Otoño Río'],['noche','🌙 Noche Profunda']].forEach(([id,label])=>{
@@ -358,7 +353,7 @@ c.append(E('div','m','Volumen = kg × reps (con peso corporal cuenta 1 kg por re
 const c2=E('div','card','<b>Calorías · últimos 14 días</b>');c2.append(E('canvas'));w.append(c2);
 const arr=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);arr.push([fmt(d),kc(fmt(d))])}requestAnimationFrame(()=>bars(c2.lastChild,arr,db.kcal));
 
-const b=E('div','card','<b>Copia de seguridad</b><div class="m">Tus datos se guardan en este navegador. Exporta de vez en cuando.</div>'),r=E('row'),e=E('button','btn','Exportar'),i=E('input');i.type='file';i.accept='.json';
+const b=E('div','card','<b>Copia de seguridad</b><div class="m">Tus datos se guardan en este navegador. Exporta de vez en cuando.</div>'),r=E('div','row'),e=E('button','btn','Exportar'),i=E('input');i.type='file';i.accept='.json';
 e.onclick=()=>{const a=E('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db)],{type:'application/json'}));a.download='mision-iregua.json';a.click()};
 i.onchange=()=>{const f=i.files[0];if(!f)return;f.text().then(t=>{try{db=Object.assign({logs:{},food:{},post:{},extra:{},quests:{},weather:{},weeklyChall:{},kcal:2200,water:{},theme:'iregua',rest:{},hs:{}},JSON.parse(t));applyTheme(db.theme||'iregua');save();render()}catch(x){alert('Archivo no válido')}})};
 r.append(e,i);b.append(r);w.append(b);return w}
