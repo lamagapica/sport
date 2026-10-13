@@ -2,10 +2,12 @@
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Misión Iregua</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#10170f">
 <style>
 :root{--bg:#10170f;--card:#1a251a;--ac:#e9b44c;--g:#7fb069;--t:#eef2e6;--m:#93a58a;--r:#d9695f}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--t);font:15px/1.4 system-ui,sans-serif;padding-bottom:76px}
+body{margin:0;background:var(--bg);color:var(--t);font:15px/1.4 system-ui,sans-serif;padding-bottom:90px}
 header{padding:14px 16px;background:linear-gradient(#22331f,#10170f);position:sticky;top:0;z-index:5}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .rank{font-weight:700;color:var(--ac)}.m{color:var(--m);font-size:13px}
@@ -14,17 +16,17 @@ header{padding:14px 16px;background:linear-gradient(#22331f,#10170f);position:st
 main{padding:12px 16px;max-width:640px;margin:auto}
 h2{margin:6px 0 10px;font-size:20px}
 .card{background:var(--card);border-radius:14px;padding:12px;margin-bottom:12px}
-.row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
 input,select{background:#0e150d;color:var(--t);border:1px solid #33452f;border-radius:9px;padding:9px;font-size:15px;min-width:0;flex:1}
 button{font:inherit;cursor:pointer}
 .btn{background:var(--ac);color:#1b1500;border:0;border-radius:9px;padding:9px 14px;font-weight:700}
 .x{background:none;border:0;color:var(--r);float:right}
-.set{padding:4px 0;border-bottom:1px solid #263525}
+.set{padding:6px 0;border-bottom:1px solid #263525}
 .chip{display:inline-block;background:#2b3a28;border-radius:20px;padding:3px 10px;margin:2px;font-size:13px}
 .chip.on{background:var(--ac);color:#1b1500;font-weight:700}
 .mis{display:flex;gap:10px;align-items:center;padding:6px 0}
 .ok{color:var(--g)}.bad{color:var(--r)}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0b110a;border-top:1px solid #263525}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0b110a;border-top:1px solid #263525;z-index:10}
 nav button{flex:1;background:none;border:0;color:var(--m);padding:10px 0;font-size:11px}
 nav button b{display:block;font-size:20px;font-weight:400}
 nav .on{color:var(--ac)}
@@ -36,23 +38,29 @@ canvas{width:100%;height:180px;display:block}
 label.ck{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #263525}
 label.ck input{flex:none;width:22px;height:22px}
 button.chip{color:var(--t);border:0;font:inherit;font-size:13px;cursor:pointer}
-.clk{font-size:56px;font-weight:700;text-align:center;color:var(--ac)}
+.clk{font-size:40px;font-weight:700;text-align:center;color:var(--ac)}
 .gr{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .tile{aspect-ratio:1;font-size:28px;background:#2b3a28;border:0;border-radius:10px;color:var(--t)}
-.arena{position:relative;height:260px;background:#0b110a;border-radius:12px;overflow:hidden}
+.arena{position:relative;height:220px;background:#0b110a;border-radius:12px;overflow:hidden}
 .ff{position:absolute;font-size:32px;background:none;border:0;animation:gl 1s infinite alternate}
 @keyframes gl{to{transform:scale(1.3)}}
 .sm{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sm .btn{padding:16px;font-size:18px}
 .sb{height:80px;border:0;border-radius:14px;transition:opacity .15s}
-.br{width:180px;height:180px;margin:20px auto;border-radius:50%;background:radial-gradient(var(--g),#2b3a28)}
-.big{font-size:22px;text-align:center;padding:12px;font-weight:600}
+.br{width:140px;height:140px;margin:10px auto;border-radius:50%;background:radial-gradient(var(--g),#2b3a28)}
+.big{font-size:20px;text-align:center;padding:8px;font-weight:600}
 .macro-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;text-align:center}
 .macro-box{background:#0e150d;border:1px solid #33452f;border-radius:8px;padding:6px;font-size:12px}
 .quiz-opt{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
 .quiz-btn{background:#0e150d;border:1px solid #33452f;color:var(--t);padding:12px;border-radius:9px;text-align:left;font-size:14px;transition:background .2s}
 .quiz-btn:active{background:#2b3a28}
 .quiz-feedback{text-align:center;font-weight:700;margin-top:8px;min-height:24px}
+.prot-alert{background:#223e25;border:1px solid var(--g);color:#b3ffb3;padding:6px 10px;border-radius:8px;margin-top:8px;font-size:12px;text-align:center;font-weight:600}
+.rpe-select{display:flex;gap:4px;margin-top:4px}
+.rpe-btn{background:#0e150d;border:1px solid #33452f;color:var(--t);border-radius:6px;padding:4px 8px;font-size:12px}
+.rpe-btn.on{background:var(--ac);color:#1b1500;font-weight:bold;border-color:var(--ac)}
+.rec-target{background:#1c2d20;border-left:3px solid var(--g);padding:6px 10px;font-size:13px;margin:6px 0;border-radius:0 8px 8px 0}
+#rest-modal{position:fixed;bottom:50px;left:0;right:0;background:#141f14;border-top:2px solid var(--ac);padding:10px 16px;z-index:20;box-shadow:0 -5px 15px rgba(0,0,0,0.5);display:none}
 </style></head><body>
 <header>
  <div class="top"><span class="rank" id="rk"></span><span id="st"></span></div>
@@ -62,7 +70,21 @@ button.chip{color:var(--t);border:0;font:inherit;font-size:13px;cursor:pointer}
 <main id="app"></main>
 <nav id="nav"></nav>
 <datalist id="fl"></datalist>
+
+<!-- Banner / Modal flotante de descanso -->
+<div id="rest-modal">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <div style="font-weight:bold;color:var(--ac)">⏱️ Rest: <span id="m-clk">3:00</span></div>
+    <button class="btn" style="padding:4px 10px;font-size:12px" id="m-close">✕ Cerrar</button>
+  </div>
+  <div id="m-game-area" style="max-height:200px;overflow:y-auto"></div>
+</div>
+
 <script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
 const K='mision-iregua',$=s=>document.querySelector(s),
 E=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e},
 esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
@@ -113,18 +135,12 @@ const WEATHER_OPTS=[
   {id:'leaves',i:'🍂',n:'Hojas caídas y calma'}
 ];
 
-const WEEKLY_CHALLENGES=[
-  {id:'posture_week',t:'Semana de Postura de Acero',d:'Completa la rutina de postura 5 días esta semana.',target:5,type:'post'},
-  {id:'food_week',t:'Combustible de Leyenda',d:'Registra tu comida 6 días esta semana.',target:6,type:'food'}
-];
-
-const INTERNAL_QUESTS=[
-  {id:'water',t:'Hidratación Sagrada',d:'Bebe un buen tramo de agua fresca antes de comenzar la faena.',xp:20},
-  {id:'breeze',t:'Brisa del Iregua',d:'Haz 3 respiraciones profundas al aire libre mirando al río.',xp:25},
-  {id:'stretch_extra',t:'Estiramiento Nómada',d:'Mantén un estiramiento extra de piernas o espalda durante 1 minuto sin prisa.',xp:30},
-  {id:'clean_form',t:'Precisión de Acero',d:'Realiza la primera serie de hoy con pausa de 2 segundos en el punto más difícil.',xp:35},
-  {id:'sunlight',t:'Baño de Luz',d:'Deja que el sol de la mañana te dé en la cara al menos 2 minutos mientras calientas.',xp:25},
-  {id:'gratitude',t:'Ofrenda al Camino',d:'Agradece en silencio una cosa de tu cuerpo y otra del entorno antes de terminar.',xp:20}
+const RECETAS_FRECUENTES=[
+  {n:'Batido de leche y plátano', k:230, p:9, c:40, f:3},
+  {n:'Macarrones con queso, atún y maíz', k:520, p:32, c:65, f:14},
+  {n:'Tortilla de 2 huevos con jamón', k:280, p:20, c:1, f:22},
+  {n:'Yogur/Skyr con frutos secos y miel', k:260, p:18, c:22, f:10},
+  {n:'Tostadas de aguacate y huevo', k:380, p:14, c:30, f:22}
 ];
 
 const FOODS={
@@ -150,29 +166,9 @@ const active=d=>hasT(d)||(db.food[d]||[]).length||(db.post[d]||[]).length;
 const mis=d=>({t:type(d)==='rest'||hasT(d),p:(db.post[d]||[]).length>=4,f:(db.food[d]||[]).length>=1});
 const full=d=>{const m=mis(d);return m.t&&m.p&&m.f&&active(d)};
 
-function getDailyQuests(d){
-  db.quests=db.quests||{};
-  if(!db.quests[d]){
-    const seed = d.split('-').reduce((a,b)=>a+parseInt(b),0);
-    const q1 = INTERNAL_QUESTS[seed % INTERNAL_QUESTS.length];
-    const q2 = INTERNAL_QUESTS[(seed + 2) % INTERNAL_QUESTS.length];
-    db.quests[d] = { [q1.id]:false, [q2.id]:false };
-    save();
-  }
-  return db.quests[d];
-}
-
 function stats(){db.rest=db.rest||{};db.hs=db.hs||{};let sets=0,fo=0,po=0,days=0,qxp=0;
 Object.keys(db.logs).forEach(d=>Object.values(db.logs[d]).forEach(a=>sets+=a.length));
 Object.keys(db.food).forEach(d=>fo+=db.food[d].length);Object.keys(db.post).forEach(d=>po+=db.post[d].length);
-Object.keys(db.quests||{}).forEach(d=>{
-  const qObj = db.quests[d];
-  const seed = d.split('-').reduce((a,b)=>a+parseInt(b),0);
-  const q1 = INTERNAL_QUESTS[seed % INTERNAL_QUESTS.length];
-  const q2 = INTERNAL_QUESTS[(seed + 2) % INTERNAL_QUESTS.length];
-  if(qObj[q1.id]) qxp += q1.xp;
-  if(qObj[q2.id]) qxp += q2.xp;
-});
 new Set([...Object.keys(db.logs),...Object.keys(db.food),...Object.keys(db.post)]).forEach(d=>{if(full(d))days++});
 let st=0,d=new Date();if(!active(fmt(d)))d.setDate(d.getDate()-1);
 while(active(fmt(d))){st++;d.setDate(d.getDate()-1)}
@@ -182,7 +178,7 @@ function head(){const s=stats(),l=Math.floor(Math.sqrt(s.xp/40))+1,a=40*(l-1)**2
 const currentRank = [...RANKS].reverse().find(r=>l>=r.lv) || RANKS[0];
 $('#rk').textContent=`Nv ${l} · ${currentRank.n}`;
 $('#st').textContent=`🔥 ${s.st} día${s.st==1?'':'s'}`;
-$('#xb').style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'%';$('#xt').textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}`}
+$('#xb').style.width=Math.min(100,(s.xp-a)/(b-a)*100)+'\%';$('#xt').textContent=`${s.xp} XP · faltan ${b-s.xp} para el nivel ${l+1}`}
 
 const NAV=[['hoy','🗺️','Hoy'],['ent','🏋️','Entreno'],['com','🍽️','Comida'],['pos','🧘','Postura'],['cal','📅','Calendario'],['des','⏱️','Descanso'],['pro','📈','Progreso']];
 function render(){head();$('#nav').innerHTML='';NAV.forEach(([k,i,n])=>{const b=E('button',k==view?'on':'',`<b>${i}</b>${n}`);b.onclick=()=>{view=k;render();scrollTo(0,0)};$('#nav').append(b)});
@@ -191,8 +187,36 @@ const dp=E('input');dp.type='date';dp.value=cur;dp.onchange=()=>{if(dp.value){cu
 if(view!='cal'&&view!='pro'&&view!='des')a.append(dp);
 a.append({hoy:vHoy,ent:vTrain,com:vFood,pos:vPost,cal:vCal,des:vRest,pro:vProg}[view]())}
 
+// Widget SVG de Campamento Evolutivo
+function renderCampWidget(){
+  const s=stats(), l=Math.floor(Math.sqrt(s.xp/40))+1;
+  const wId=db.weather[cur]||'sun';
+  
+  let skyColor="#1a2e3b";
+  let weatherSvg="";
+  if(wId==='sun'){ skyColor="#223d52"; weatherSvg='<circle cx="260" cy="40" r="18" fill="#e9b44c" opacity="0.8"/>'; }
+  else if(wId==='wind'){ weatherSvg='<path d="M100 30 Q140 20 180 30 M150 45 Q190 35 230 45" stroke="#93a58a" stroke-width="2" fill="none" opacity="0.5"/>'; }
+  else if(wId==='river'){ skyColor="#17313b"; weatherSvg='<path d="M0 100 Q150 90 300 105" stroke="#4cbce9" stroke-width="8" fill="none" opacity="0.3"/>'; }
+  else if(wId==='leaves'){ weatherSvg='<text x="50" y="40" font-size="12">🍂</text><text x="220" y="60" font-size="12">🍂</text>'; }
+
+  // Evolución del campamento por niveles
+  let items = `<polygon points="120,100 150,50 180,100" fill="#2b3a28" stroke="#3d5239" stroke-width="2"/>`; // Tienda básica
+  if(l >= 3){ items += `<circle cx="200" cy="95" r="8" fill="#555"/><path d="M200 95 L200 85 M197 90 L203 90" stroke="#ff7700" stroke-width="3"/>`; } // Fuego
+  if(l >= 5){ items += `<rect x="70" y="85" width="20" height="15" fill="#4a3525"/>`; } // Herramientas / Tronco
+  if(l >= 8){ items += `<polygon points="240,100 255,60 270,100" fill="#2b3a28"/>`; } // Segunda tienda / Estandarte
+  if(l >= 12){ items += `<path d="M40 100 L40 70 L55 80 Z" fill="#e9b44c"/>`; } // Tótem / Bandera
+
+  return `<svg viewBox="0 0 300 110" style="width:100%;background:${skyColor};border-radius:12px;margin-bottom:10px;">
+    ${weatherSvg}
+    <path d="M0 85 Q150 75 300 85 L300 110 L0 110 Z" fill="#141f13"/>
+    ${items}
+    <text x="10" y="20" fill="#eef2e6" font-size="10" font-weight="bold">Campamento Base · Nv ${l}</text>
+  </svg>`;
+}
+
 function vHoy(){const w=E('div'),t=type(cur),m=mis(cur),s=stats(),doy=Math.floor(pd(cur)/864e5);
 w.append(E('h2','',`${R[t].i} ${R[t].n}`));
+w.innerHTML += renderCampWidget();
 w.append(E('div','card',`<i>“${Q[doy%Q.length]}”</i>`));
 
 db.weather=db.weather||{};
@@ -219,69 +243,113 @@ const c=E('div','card','<b>Misiones del día</b>');
 [[m.t,t==='rest'?'Descanso activo: camina junto al río':'Completar el entreno ('+exs(t).length+' ejercicios)'],[m.p,'Postura y pelvis (mín. 4 ejercicios)'],[m.f,'Registrar tu comida']].forEach(([o,x])=>c.append(E('div','mis',`<span class="${o?'ok':'m'}">${o?'✅':'⬜'}</span>${x}`)));
 c.append(E('div','m',full(cur)?'¡Día perfecto! +40 XP ✨':'Completa las 3 misiones para el bonus de +40 XP'));w.append(c);
 
-const seed = cur.split('-').reduce((a,b)=>a+parseInt(b),0);
-const q1 = INTERNAL_QUESTS[seed % INTERNAL_QUESTS.length];
-const q2 = INTERNAL_QUESTS[(seed + 2) % INTERNAL_QUESTS.length];
-const qStatus = getDailyQuests(cur);
-
-const qc=E('div','card','<b>🗺️ Misiones Internas del Camino</b><div class="m" style="margin-bottom:6px">Tareas especiales de aventura para hoy:</div>');
-[q1, q2].forEach(q=>{
-  const done = !!qStatus[q.id];
-  const l=E('label','ck',`<input type=checkbox ${done?'checked':''}> <span><b>${q.t}</b> (+${q.xp} XP)<br><span class="m">${q.d}</span></span>`);
-  l.firstChild.onchange=e=>{
-    db.quests[cur][q.id] = e.target.checked;
-    save();
-    render();
-  };
-  qc.append(l);
-});
-w.append(qc);
-
 const L=[['Primera serie',s.sets>=1],['Racha 3',s.st>=3],['Racha 7',s.st>=7],['Racha 30',s.st>=30],['100 series',s.sets>=100],['Día perfecto',s.days>=1],['10 días perfectos',s.days>=10]];
 w.append(E('div','card','<b>Logros</b><br>'+L.map(([n,o])=>`<span class="chip ${o?'on':''}">${o?'🏆':'🔒'} ${n}</span>`).join('')));return w}
 
 function vTrain(){const w=E('div'),t=type(cur);w.append(E('h2','',`${R[t].i} ${R[t].n}`));
 if(!exs(t).length)w.append(E('p','m','Hoy toca descanso activo. Haz la rutina de postura y pasea. Si quieres, entrena igualmente desde otro día.'));
-exs(t).forEach(ex=>{const L=(db.logs[cur]||{})[ex]||[],p=prev(ex,cur),c=E('div','card',`<b>${esc(ex)}</b>`);
-if(p)c.append(E('div','m',`Última vez (${p.d}): ${p.s.map(s=>s.w+'kg×'+s.r).join(' · ')}`));
-L.forEach((s,i)=>{const r=E('div','set',`Serie ${i+1}: <b>${s.w} kg × ${s.r}</b>`),b=E('button','x','✕');b.onclick=()=>{L.splice(i,1);if(!L.length)delete db.logs[cur][ex];save();render()};r.append(b);c.append(r)});
-const f=E('div','row','<input type=number step=.5 min=0 placeholder="kg (0 = cuerpo)"><input type=number min=1 placeholder="reps">'),[wi,ri]=f.querySelectorAll('input');
-wi.value=L.length?L[L.length-1].w:(p?p.s[0].w:'');
-const b=E('button','btn','+ serie');b.onclick=()=>{const r=+ri.value;if(!r)return;(db.logs[cur]=db.logs[cur]||{})[ex]=[...L,{w:+wi.value||0,r}];save();render()};
-f.append(b);c.append(f);w.append(c)});
+exs(t).forEach(ex=>{
+  const L=(db.logs[cur]||{})[ex]||[],p=prev(ex,cur),c=E('div','card',`<b>${esc(ex)}</b>`);
+  
+  // Recomendación automática de objetivo
+  if(p && p.s.length > 0){
+    const last = p.s[p.s.length-1];
+    const recReps = last.r + 2;
+    c.append(E('div','rec-target',`🎯 <b>Objetivo de hoy:</b> La última vez hiciste ${last.w}kg × ${last.r} reps. Hoy intenta: <b>${last.w}kg × ${recReps} reps</b>.`));
+  }
+
+  L.forEach((s,i)=>{
+    const rpeText = s.rpe ? ` · <span style="color:var(--ac)">${s.rpe}</span>` : '';
+    const r=E('div','set',`Serie ${i+1}: <b>${s.w} kg × ${s.r} reps</b>${rpeText}`),b=E('button','x','✕');
+    b.onclick=()=>{L.splice(i,1);if(!L.length)delete db.logs[cur][ex];save();render()};
+    r.append(b);c.append(r);
+  });
+
+  const f=E('div','row','<input type=number step=.5 min=0 placeholder="kg (0 = cuerpo)"><input type=number min=1 placeholder="reps">'),[wi,ri]=f.querySelectorAll('input');
+  wi.value=L.length?L[L.length-1].w:(p?p.s[0].w:'');
+  
+  // Selector RPE / Caritas
+  let selRPE = '😃 RIR 2';
+  const rpeDiv = E('div','rpe-select');
+  ['😃 RIR 2', '🔥 RIR 1', '💀 Fallo'].forEach(opt=>{
+    const btn = E('button','rpe-btn'+(opt===selRPE?' on':''), opt);
+    btn.onclick = ()=>{
+      selRPE = opt;
+      rpeDiv.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+    };
+    rpeDiv.append(btn);
+  });
+  c.append(rpeDiv);
+
+  const b=E('button','btn','+ serie');
+  b.onclick=()=>{
+    const r=+ri.value;if(!r)return;
+    (db.logs[cur]=db.logs[cur]||{})[ex]=[...L,{w:+wi.value||0,r,rpe:selRPE}];
+    save();render();
+    openRestModal(); // Abrir banner emergente de descanso
+  };
+  f.append(b);c.append(f);w.append(c);
+});
 const f=E('div','row','<input placeholder="Añadir ejercicio a este día">'),b=E('button','btn','+');
 b.onclick=()=>{const v=f.firstChild.value.trim();if(v){(db.extra[t]=db.extra[t]||[]).push(v);save();render()}};f.append(b);w.append(f);return w}
 
-function vFood(){const w=E('div'),F=db.food[cur]||[],tot=kc(cur),mac=getMacros(cur);w.append(E('h2','','🍽️ Provisiones y Macros'));
-const c=E('div','card',`<b>${tot} kcal</b> de tu meta de <b>${db.kcal}</b>`);
-c.append(E('div','bar',`<i style="width:${Math.min(100,tot/db.kcal*100)}%"></i>`));
+function vFood(){
+  const w=E('div'),F=db.food[cur]||[],tot=kc(cur),mac=getMacros(cur);
+  const targetProt = 100;
+  const protPct = Math.min(100, (mac.p / targetProt) * 100);
 
-c.append(E('div','macro-grid',`
-  <div class="macro-box"><b>Proteínas</b><br>${mac.p.toFixed(1)}g</div>
-  <div class="macro-box"><b>Carbos</b><br>${mac.c.toFixed(1)}g</div>
-  <div class="macro-box"><b>Grasas</b><br>${mac.f.toFixed(1)}g</div>
-`));
+  w.append(E('h2','','🍽️ Provisiones y Macros'));
+  const c=E('div','card',`<b>${tot} kcal</b> de tu meta de <b>${db.kcal}</b>`);
+  c.append(E('div','bar',`<i style="width:${Math.min(100,tot/db.kcal*100)}%"></i>`));
 
-c.append(E('div','m',`<br>La meta es combustible para entrenar y recuperarte. Ajústala cuando lo necesites.`));
-const mf=E('div','row','<input type=number placeholder="Meta kcal">'),mi=mf.firstChild;mi.value=db.kcal;mi.onchange=()=>{if(+mi.value>0){db.kcal=+mi.value;save();render()}};c.append(mf);w.append(c);
+  c.append(E('div','macro-grid',`
+    <div class="macro-box">
+      <b>Proteínas</b><br>${mac.p.toFixed(1)}g / ${targetProt}g
+      <div class="bar" style="height:4px;margin:4px 0 0"><i style="width:${protPct}%"></i></div>
+    </div>
+    <div class="macro-box"><b>Carbos</b><br>${mac.c.toFixed(1)}g</div>
+    <div class="macro-box"><b>Grasas</b><br>${mac.f.toFixed(1)}g</div>
+  `));
 
-F.forEach((x,i)=>{const r=E('div','set',`${esc(x.n)} — <b>${x.k} kcal</b> <span class="m">(P:${x.p||0}g C:${x.c||0}g G:${x.f||0}g)</span>`),b=E('button','x','✕');b.onclick=()=>{F.splice(i,1);save();render()};r.append(b);c.append(r)});
-
-const f=E('div','card','<b>Añadir comida</b><div class="row"><input list=fl placeholder="Alimento"><input type=number placeholder="gramos"><input type=number placeholder="kcal opcional"></div>'),[n,g,k]=f.querySelectorAll('input'),b=E('button','btn','Añadir');
-b.onclick=()=>{
-  const nm=n.value.trim(), grams=+g.value||0, key=Object.keys(FOODS).find(x=>x.toLowerCase()==nm.toLowerCase());
-  let kk=+k.value, p=0, c=0, fv=0;
-  if(key){
-    const item=FOODS[key];
-    if(!kk && grams) kk=Math.round(item.k*grams/100);
-    if(grams){ p=(item.p*grams/100); c=(item.c*grams/100); fv=(item.f*grams/100); }
+  if(mac.p >= 80){
+    c.append(E('div','prot-alert','💪 ¡Suficiente proteína para recuperar tu sesión! (>= 80g)'));
   }
-  if(!kk) kk=0;
-  if(!nm||(!kk && !grams)){alert('Introduce un alimento válido y gramos o calorías.');return}
-  (db.food[cur]=db.food[cur]||[]).push({n:nm+(grams?` (${grams} g)`:''),k:kk,p:Math.round(p*10)/10,c:Math.round(c*10)/10,f:Math.round(fv*10)/10});
-  save();render()
-};
-f.append(b);w.append(f);return w}
+
+  c.append(E('div','m',`<br>La meta es combustible para entrenar y recuperarte. Ajústala cuando lo necesites.`));
+  const mf=E('div','row','<input type=number placeholder="Meta kcal">'),mi=mf.firstChild;mi.value=db.kcal;mi.onchange=()=>{if(+mi.value>0){db.kcal=+mi.value;save();render()}};c.append(mf);w.append(c);
+
+  // Recetas / Platos frecuentes
+  const recCard = E('div','card','<b>⭐ Recetas / Platos Frecuentes</b><div class="m" style="margin-bottom:6px">Selecciona un plato habitual para añadirlo rápidamente:</div>');
+  const recSelect = E('select','',`<option value="">-- Seleccionar Receta --</option>` + RECETAS_FRECUENTES.map((r,i)=>`<option value="${i}">${r.n} (${r.k} kcal)</option>`).join(''));
+  const recBtn = E('button','btn','+ Añadir plato');
+  recBtn.onclick = ()=>{
+    const idx = recSelect.value;
+    if(idx === "") return;
+    const item = RECETAS_FRECUENTES[idx];
+    (db.food[cur]=db.food[cur]||[]).push({n:item.n, k:item.k, p:item.p, c:item.c, f:item.f});
+    save();render();
+  };
+  const recRow = E('div','row'); recRow.append(recSelect, recBtn); recCard.append(recRow); w.append(recCard);
+
+  F.forEach((x,i)=>{const r=E('div','set',`${esc(x.n)} — <b>${x.k} kcal</b> <span class="m">(P:${x.p||0}g C:${x.c||0}g G:${x.f||0}g)</span>`),b=E('button','x','✕');b.onclick=()=>{F.splice(i,1);save();render()};r.append(b);c.append(r)});
+
+  const f=E('div','card','<b>Añadir alimento individual</b><div class="row"><input list=fl placeholder="Alimento"><input type=number placeholder="gramos"><input type=number placeholder="kcal opcional"></div>'),[n,g,k]=f.querySelectorAll('input'),b=E('button','btn','Añadir');
+  b.onclick=()=>{
+    const nm=n.value.trim(), grams=+g.value||0, key=Object.keys(FOODS).find(x=>x.toLowerCase()==nm.toLowerCase());
+    let kk=+k.value, p=0, c=0, fv=0;
+    if(key){
+      const item=FOODS[key];
+      if(!kk && grams) kk=Math.round(item.k*grams/100);
+      if(grams){ p=(item.p*grams/100); c=(item.c*grams/100); fv=(item.f*grams/100); }
+    }
+    if(!kk) kk=0;
+    if(!nm||(!kk && !grams)){alert('Introduce un alimento válido y gramos o calorías.');return}
+    (db.food[cur]=db.food[cur]||[]).push({n:nm+(grams?` (${grams} g)`:''),k:kk,p:Math.round(p*10)/10,c:Math.round(c*10)/10,f:Math.round(fv*10)/10});
+    save();render()
+  };
+  f.append(b);w.append(f);return w
+}
 
 function vPost(){const w=E('div'),P=db.post[cur]||[];w.append(E('h2','','🧘 Ritual de postura y pelvis'));
 w.append(E('p','m','Cada día, despacio y con la respiración tranquila. Mejor poco y bien hecho que mucho con prisa.'));
@@ -330,22 +398,6 @@ RANKS.forEach(r=>{
 });
 w.append(rankCard);
 
-const chCard=E('div','card','<b>🔥 Desafíos de la Racha de Fuego</b><div class="m" style="margin-bottom:8px">Retos semanales para potenciar tu constancia:</div>');
-const now = new Date();
-const startOfWeek = new Date(now);
-startOfWeek.setDate(now.getDate() - ((now.getDay()+6)%7));
-let weekDaysCount = 0;
-for(let i=0; i<7; i++){
-  const dStr = fmt(new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate()+i));
-  if((db.post[dStr]||[]).length>=4) weekDaysCount++;
-}
-WEEKLY_CHALLENGES.forEach(ch=>{
-  const prog = Math.min(ch.target, weekDaysCount);
-  const done = prog >= ch.target;
-  chCard.append(E('div','mis',`<span class="${done?'ok':'m'}">${done?'✅':'🔥'}</span><span><b>${ch.t}</b> (${prog}/${ch.target} días)<br><span class="m">${ch.d}</span></span>`));
-});
-w.append(chCard);
-
 const all=[...new Set(Object.values(db.logs).flatMap(d=>Object.keys(d)))];
 if(!all.length)w.append(E('p','m','Registra series en Entreno y aquí verás tu gráfico.'));
 else{if(!all.includes(pex))pex=all[0];const sel=E('select','',all.map(a=>`<option ${a==pex?'selected':''}>${esc(a)}</option>`).join(''));sel.onchange=()=>{pex=sel.value;render()};w.append(sel);
@@ -363,43 +415,6 @@ i.onchange=()=>{const f=i.files[0];if(!f)return;f.text().then(t=>{try{db=Object.
 r.append(e,i);b.append(r);w.append(b);return w}
 
 const EM=['🌲','🦊','🍄','🦉','🌸','🐟','🪨','🦌','🌙','⭐'];
-
-const CULTURA_QUESTIONS = [
-  {q:'¿Cuál es el río más largo del mundo?',o:['Amazonas','Nilo','Misisipi','Yangtsé'],a:0},
-  {q:'¿En qué año llegó el ser humano a la Luna?',o:['1965','1969','1972','1959'],a:1},
-  {q:'¿Cuál es el elemento químico más abundante en el universo?',o:['Oxígeno','Carbono','Hidrógeno','Helio'],a:2},
-  {q:'¿Quién pintó la Mona Lisa?',o:['Vincent van Gogh','Leonardo da Vinci','Pablo Picasso','Claude Monet'],a:1},
-  {q:'¿Cuál es el país más extenso del planeta?',o:['Canadá','China','Estados Unidos','Rusia'],a:3},
-  {q:'¿En qué museo se encuentra la escultura de la Venus de Milo?',o:['El Prado','Louvre','British Museum','Uffizi'],a:1},
-  {q:'¿Cuál es el hueso más largo del cuerpo humano?',o:['Fémur','Tibia','Húmero','Radio'],a:0},
-  {q:'¿Qué gas absorben principalmente las plantas durante la fotosíntesis?',o:['Oxígeno','Dióxido de carbono','Nitrógeno','Mióxido'],a:1},
-  {q:'¿Qué cordillera separa Europa de Asia?',o:['Los Alpes','Los Pirineos','Los Montes Urales','El Himalaya'],a:2},
-  {q:'¿A qué velocidad aproximada viaja la luz en el vacío?',o:['300.000 km/s','150.000 km/s','1.000.000 km/s','500.000 km/s'],a:0},
-  {q:'¿Cuál es la capital de Australia?',o:['Sídney','Melbourne','Canberra','Brisbane'],a:2},
-  {q:'¿Quién escribió "Don Quijote de la Mancha"?',o:['Lope de Vega','Miguel de Cervantes','Francisco de Quevedo','Calderón de la Barca'],a:1},
-  {q:'¿Qué planeta del sistema solar es conocido como el "planeta rojo"?',o:['Venus','Júpiter','Marte','Saturno'],a:2},
-  {q:'¿En qué continente se encuentra el desierto del Sahara?',o:['Asia','África','América del Sur','Oceanía'],a:1},
-  {q:'¿Cuál es el océano más grande de la Tierra?',o:['Océano Atlántico','Océano Índico','Océano Pacífico','Océano Ártico'],a:2}
-];
-
-const INGLES_QUESTIONS = [
-  {q:'¿Cómo se traduce "Aprender"?',o:['Learn','Teach','Listen','Speak'],a:0},
-  {q:'Elige la forma correcta: "She _____ to the gym every morning."',o:['go','goes','going','gone'],a:1},
-  {q:'¿Cuál es el pasado simple del verbo "Buy" (Comprar)?',o:['Buyed','Bought','Bring','Brought'],a:1},
-  {q:'¿Qué significa "River" en español?',o:['Montaña','Río','Bosque','Camino'],a:1},
-  {q:'Elige el sinónimo de "Fast":',o:['Slow','Quick','Heavy','Late'],a:1},
-  {q:'Completa la frase: "If I _____ time, I will read a book."',o:['have','had','has','having'],a:0},
-  {q:'¿Cómo se dice "Desayuno" en inglés?',o:['Dinner','Lunch','Breakfast','Snack'],a:2},
-  {q:'Elige la frase gramaticalmente correcta:',o:['He don\'t like apples','He doesn\'t likes apples','He doesn\'t like apples','He not like apples'],a:2},
-  {q:'¿Cuál es el opuesto (antónimo) de "Strong"?',o:['Tired','Weak','Small','Light'],a:1},
-  {q:'¿Qué significa la expresión "Better late than never"?',o:['Más vale tarde que nunca','El tiempo es oro','A quien madruga Dios le ayuda','Más vale prevenir que curar'],a:0},
-  {q:'¿Cómo se traduce "Fuerza"?',o:['Strength','Health','Weight','Speed'],a:0},
-  {q:'Completa: "They have been living here _____ 2010."',o:['for','since','during','from'],a:1},
-  {q:'¿Cuál es el participio pasado del verbo "Eat"?',o:['Ate','Eating','Eaten','Eats'],a:2},
-  {q:'¿Qué significa la palabra "Healthy"?',o:['Fuerte','Saludable','Pesado','Rápido'],a:1},
-  {q:'Elige el plural correcto de "Child":',o:['Childs','Childrens','Children','Childes'],a:2}
-];
-
 const GAMES={
 mem(a,sc){let lv=3,open=[],lock=false,found=0,t=[];
 function L(){a.innerHTML='';const em=EM.slice(0,lv),cs=[...em,...em].sort(()=>Math.random()-.5);found=0;open=[];lock=false;const g=E('div','gr');
@@ -421,79 +436,50 @@ function play(){busy=true;sg.textContent='Mira…';seq.push(Math.random()*4|0);p
 function tap(i){if(busy)return;fl(i);if(i!=seq[pos]){sg.textContent='Fallaste, de nuevo';seq=[];busy=true;t.push(setTimeout(play,900));return}
 if(++pos==seq.length){sc(seq.length*3);busy=true;t.push(setTimeout(play,700))}}
 play();return()=>t.forEach(clearTimeout)},
-cul(a,sc){
-  let t=[];
-  const renderQ=()=>{
-    a.innerHTML='';
-    const item = CULTURA_QUESTIONS[Math.floor(Math.random()*CULTURA_QUESTIONS.length)];
-    a.append(E('div','big',item.q));
-    const optDiv = E('div','quiz-opt');
-    const feedback = E('div','quiz-feedback','');
-    let locked = false;
-    item.o.forEach((opt, idx)=>{
-      const btn = E('button','quiz-btn',opt);
-      btn.onclick=()=>{
-        if(locked) return;
-        locked = true;
-        if(idx === item.a){
-          btn.style.borderColor = 'var(--g)';
-          btn.style.background = '#283c22';
-          feedback.innerHTML = '<span class="ok">¡Correcto! (+10 pts)</span>';
-          sc(10);
-        } else {
-          btn.style.borderColor = 'var(--r)';
-          btn.style.background = '#3c2222';
-          feedback.innerHTML = '<span class="bad">Incorrecto</span>';
-        }
-        t.push(setTimeout(renderQ, 1200));
-      };
-      optDiv.append(btn);
-    });
-    a.append(optDiv, feedback);
-  };
-  renderQ();
-  return ()=>t.forEach(clearTimeout);
-},
-ing(a,sc){
-  let t=[];
-  const renderQ=()=>{
-    a.innerHTML='';
-    const item = INGLES_QUESTIONS[Math.floor(Math.random()*INGLES_QUESTIONS.length)];
-    a.append(E('div','big',item.q));
-    const optDiv = E('div','quiz-opt');
-    const feedback = E('div','quiz-feedback','');
-    let locked = false;
-    item.o.forEach((opt, idx)=>{
-      const btn = E('button','quiz-btn',opt);
-      btn.onclick=()=>{
-        if(locked) return;
-        locked = true;
-        if(idx === item.a){
-          btn.style.borderColor = 'var(--g)';
-          btn.style.background = '#283c22';
-          feedback.innerHTML = '<span class="ok">¡Great! (+10 pts)</span>';
-          sc(10);
-        } else {
-          btn.style.borderColor = 'var(--r)';
-          btn.style.background = '#3c2222';
-          feedback.innerHTML = '<span class="bad">Oops! Incorrect</span>';
-        }
-        t.push(setTimeout(renderQ, 1200));
-      };
-      optDiv.append(btn);
-    });
-    a.append(optDiv, feedback);
-  };
-  renderQ();
-  return ()=>t.forEach(clearTimeout);
-},
 res(a){a.innerHTML='<div class="br"></div><div class="m" style="text-align:center">Inhala…</div>';const c=a.firstChild,tx=a.lastChild;let run=1,t;
 function cyc(i){if(!run)return;c.style.transition='transform '+(i?6:4)+'s ease-in-out';c.style.transform=i?'scale(.5)':'scale(1)';tx.textContent=i?'Exhala despacio…':'Inhala por la nariz…';t=setTimeout(()=>cyc(1-i),i?6000:4000)}
 c.style.transform='scale(.5)';setTimeout(()=>cyc(0),50);return()=>{run=0;clearTimeout(t)}}};
 
 function beep(){try{const A=new AudioContext(),o=A.createOscillator();o.connect(A.destination);o.frequency.value=880;o.start();o.stop(A.currentTime+.4)}catch(e){}navigator.vibrate&&navigator.vibrate([200,100,200])}
 
-function vRest(){const w=E('div'),names={mem:'🧠 Memoria',fire:'✨ Luciérnagas',mat:'➗ Cálculo',sim:'🎵 Secuencia',cul:'🌐 Cultura',ing:'🇬🇧 Inglés',res:'🌬️ Respira'};
+// Lógica del mini-modal flotante de descanso
+let modalIv = null, modalCleanup = null;
+function openRestModal(){
+  const modal = $('#rest-modal');
+  const clk = $('#m-clk');
+  const area = $('#m-game-area');
+  modal.style.display = 'block';
+  
+  if(modalIv) clearInterval(modalIv);
+  if(modalCleanup) modalCleanup();
+  
+  let end = Date.now() + 180000;
+  let game = db.lastGame || 'mem';
+  let score = 0;
+  
+  const sc = n => { score += n; };
+  modalCleanup = GAMES[game](area, sc);
+  
+  modalIv = setInterval(()=>{
+    const l = Math.max(0, end - Date.now()), s = Math.ceil(l / 1000);
+    clk.textContent = Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+    if(l <= 0){
+      clearInterval(modalIv);
+      if(modalCleanup) modalCleanup();
+      const t = fmt(new Date()); db.rest[t] = (db.rest[t]||0) + 1; save(); head();
+      area.innerHTML = '<div class="big">¡Descanso terminado! 💪</div>';
+      beep();
+    }
+  }, 1000);
+}
+
+$('#m-close').onclick = ()=>{
+  $('#rest-modal').style.display = 'none';
+  if(modalIv) clearInterval(modalIv);
+  if(modalCleanup) modalCleanup();
+};
+
+function vRest(){const w=E('div'),names={mem:'🧠 Memoria',fire:'✨ Luciérnagas',mat:'➗ Cálculo',sim:'🎵 Secuencia',res:'🌬️ Respira'};
 w.append(E('h2','','⏱️ Descanso entre series'));
 const c=E('div','card','<div class="clk">3:00</div><div class="m" style="text-align:center">Elige un minijuego y empieza. Al acabar los 3 min: +10 XP.</div>'),clk=c.firstChild,inf=c.lastChild;
 const pk=E('div','row'),ar=E('div','card','<div class="m">Pulsa empezar para jugar</div>'),bs=E('button','btn','▶ Empezar descanso (3:00)');bs.style.cssText='width:100%;margin:6px 0 12px';
